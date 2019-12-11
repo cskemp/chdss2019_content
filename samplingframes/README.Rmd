@@ -1,0 +1,23 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+# Sampling Frames
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This project folder is for the sampling frames work (ie our running example at the  summer school). The goal is to show you how the files for a real research project might be organized.
+
+This project is based on the newproject template at https://github.com/djnavarro/newproject.  It contains the following folders: [analysis](./analysis), [data](./data), [experiments](./experiments), [other](./other), [preprocessing](./preprocessing), [models](./models) and [writeup](./writeup).  
+
+If there are other resouces (e.g., OSF folders, Overleaf documents, Google docs)
+that are linked to the project, they should be listed in this document.
