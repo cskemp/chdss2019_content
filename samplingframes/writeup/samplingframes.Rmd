@@ -1,6 +1,6 @@
 ---
 title             : "Selective sampling and inductive inference: Drawing inferences based on observed and missing evidence"
-shorttitle        : "Title"
+shorttitle        : "xxx"
 
 author: 
   - name          : "Brett Hayes"
@@ -36,7 +36,7 @@ wordcount         : "X"
 
 bibliography      : ["samplingframes.bib"]
 
-floatsintext      : no
+floatsintext      : yes
 figurelist        : no
 tablelist         : no
 footnotelist      : no
@@ -51,6 +51,9 @@ output            : papaja::apa6_pdf
 
 ```{r setup, include = FALSE}
 library("papaja")
+library("here")
+library("tidyverse")
+library("lme4")
 ```
 
 ```{r analysis-preferences}
@@ -59,6 +62,23 @@ set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ```
 
+```{r samplesize_data, echo=FALSE}
+frames <- read_csv(here("data", "data_samplesize.csv"))
+fullframes <- frames %>%  
+  mutate(generalisation = (response+.1)/9.2) %>% mutate(id=factor(id)) %>%  
+  mutate(id=factor(id)) %>%  
+  mutate(sample_size = factor(sample_size, levels = c("small","medium","large")))  
+ 
+fullframes_avg <- fullframes %>% 
+  group_by(test_item, condition, sample_size) %>% 
+  summarise( 
+    n = n(), 
+    sd=sd(generalisation),  
+    se=sd/sqrt(n), 
+    generalisation = mean(generalisation), 
+    ) %>% 
+  ungroup() 
+```
 
 @xut07a wrote an earlier paper on sampling.
 
@@ -68,6 +88,27 @@ We report how we determined our sample size, all data exclusions (if any), all m
 
 ## Participants
 
+```{r descriptives, echo=FALSE}
+descriptivestats_table <- fullframes  %>%
+  group_by(id, condition) %>%
+  summarise(
+    response = mean(response),
+  ) %>% 
+  ungroup() %>% 
+  group_by(condition) %>% 
+ 
+  summarise(
+    mean_resp = mean(response),
+    sd_resp = sd(response),
+    n = n()
+  )
+
+ncategory <- descriptivestats_table %>% filter(condition=='category') %>% pull('n')
+nproperty <- descriptivestats_table %>% filter(condition=='property') %>% pull('n')
+```
+
+There were `r ncategory` participants in the category sampling condition and `r nproperty`  in the property sampling condition.
+
 ## Material
 
 ## Procedure
@@ -75,6 +116,37 @@ We report how we determined our sample size, all data exclusions (if any), all m
 ## Data analysis
 
 # Results
+
+```{r samplesize_plot}
+expsummary <- fullframes_avg %>% 
+  ggplot(aes(x = test_item, y = generalisation, colour = condition)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = generalisation - se, ymax = generalisation + se)) + 
+  facet_wrap(~sample_size) 
+plot(expsummary)
+```
+
+
+```{r regression, cache=TRUE, results='asis'}
+# Fit a model without random effects just to show how papaja creates tables
+
+logitmod <- glm(
+  formula = generalisation ~ condition + test_item + n_obs,
+  family = gaussian(link = "logit"),
+  data = fullframes)
+apa_glm <- apa_print(logitmod)
+
+apa_table(
+  apa_glm$table
+  , caption = "Regression table for a model with fixed effects only."
+  , escape = FALSE
+)
+```
+
+
+
+
 
 # Discussion
 
