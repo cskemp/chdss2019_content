@@ -1,0 +1,90 @@
+---
+title             : "Selective sampling and inductive inference: Drawing inferences based on observed and missing evidence"
+shorttitle        : "Title"
+
+author: 
+  - name          : "Brett Hayes"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "School of Psychology, University of New South Wales, NSW 2052, Australia"
+    email         : "B.Hayes@unsw.edu.au"
+  - name          : "Stephanie  Banner"
+    affiliation   : "1"
+  - name          : "Suzy Forrester"
+    affiliation   : "1"
+  - name          : "Danielle J. Navarro"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "University of New South Wales, Australia"
+
+authornote: |
+  Add complete departmental affiliations for each author here. Each new line herein must be indented, like this line.
+
+  Enter author note here.
+
+abstract: |
+
+  We propose and test a Bayesian model of property induction with evidence that has been selectively sampled leading to "censoring" or exclusion of potentially relevant data.
+
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "Inductive reasoning; property inference"
+wordcount         : "X"
+
+bibliography      : ["samplingframes.bib"]
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+
+@xut07a wrote an earlier paper on sampling.
+
+
+# Methods
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. <!-- 21-word solution (Simmons, Nelson & Simonsohn, 2012; retrieved from http://ssrn.com/abstract=2160588) -->
+
+## Participants
+
+## Material
+
+## Procedure
+
+## Data analysis
+
+# Results
+
+# Discussion
+
+\newpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup
