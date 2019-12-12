@@ -1,0 +1,158 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Probabilistic models</h1></div>'
+author: "Charles Kemp"
+date: "CHDSS 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, progress = TRUE)
+```
+
+```{r packageload, message=FALSE}
+library(here)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+## Foodweb problem
+
+## Prior distribution
+
+```{r foodweb}
+
+speciesnames <- c("kelp", "herring", "dolphin", "tuna", "sandshark", "mako", "human")
+
+b <- 0.1 # base rate
+t <- 0.5 # transmission rate
+
+# set up noisy-OR CPDs
+
+zerop <- c(1-b,b)
+onep  <- structure(.Data = c(1-b,(1-t)*(1-b),b,1 - (1-t)*(1-b)), .Dim = c(2,2))
+twop  <- structure(.Data = c( 1-b, 
+                             (1-t)*(1-b), 
+                             (1-t)*(1-b), 
+                             (1-t)*(1-t)*(1-b), 
+                              b, 
+                              1-(1-t)*(1-b), 
+                              1-(1-t)*(1-b), 
+                              1-(1-t)*(1-t)*(1-b)),  .Dim = c(2,2,2))
+cpds <- list( kelp=zerop, 
+              herring=onep, 
+              dolphin=onep,
+              tuna=onep,
+              sandshark=onep,
+              mako=twop,
+              human=onep )
+
+# function that computes the probability of hypothesis H, which specifies a
+# value for each species in the foodweb 
+
+p_h <- function(h) {
+  prob = cpds$kelp[h$kelp] *
+    cpds$herring[h$kelp,h$herring] *
+    cpds$dolphin[h$herring,h$dolphin] *
+    cpds$tuna[h$herring,h$tuna] *
+    cpds$sandshark[h$herring,h$sandshark] *
+    cpds$mako[h$dolphin,h$tuna,h$mako] *
+    cpds$human[h$mako,h$human] 
+
+  return(prob)
+}
+
+# create full hypothesis space. Remember that 1 and 2 indicate FALSE and TRUE
+# respectively
+
+n <-  length(speciesnames)
+hs <-  expand.grid(replicate(n, 1:2, simplify = FALSE))
+colnames(hs) <- speciesnames
+hs <- as_tibble(hs)
+nH <- nrow(hs)
+
+hs$prior = NA
+
+# set up prior 
+for (i in 1:nH) {
+  hs$prior[i] <- p_h(hs[i,])
+}
+
+tail(hs)
+```
+
+
+```{r data}
+# Specify that kelp does not have the disease, but makos do
+obs <- list(kelp = 1, mako = 2)
+```
+
+```{r compute_likelihood}
+
+# Compute likelihood p(obs|h) 
+p_obs_given_h <- function(obs, h) {
+  likelihood <- 1
+  for (l in labels(obs)) {
+    if (obs[l] != h[l]) {
+      likelihood <-  0
+    }
+  }
+  return(likelihood)
+}
+
+hs$likelihood= NA
+for (i in 1:nH) {
+  hs$likelihood[i] <- p_obs_given_h(obs, hs[i,])
+}
+tail(hs)
+```
+
+```{r posterior}
+# compute posterior
+hs$posterior <- hs$prior* hs$likelihood
+# "normalise" the posterior so that it sums to 1
+hs$posterior <- hs$posterior / sum( hs$posterior ) 
+tail(hs)
+```
+
+
+```{r predictions}
+# compute posterior predictive distribution: ie generalizations for each species in the foodweb
+
+gen <- hs[1,] %>% select(-likelihood, posterior)
+for( animalname  in speciesnames ) {
+    consistentHypotheses <- as.logical(hs[[animalname]]-1)
+    gen[animalname] <- sum( hs$posterior[consistentHypotheses] ) 
+}
+print(gen)
+```
+
+```{r plotpredictions, fig.width=6,  fig.height=3}
+
+makeplot <- function(gen, plotname) {
+    genplot <- gather(gen)
+    genplot <- genplot %>%
+       mutate(species = factor(key, levels=speciesnames), gen=value) 
+
+    pic <- genplot %>%
+       ggplot(aes(x=species, y=value)) +
+       scale_y_continuous(lim=c(0,1)) +  
+       geom_col() + 
+       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+       xlab("species") +
+       ylab("prob of having disease") 
+
+    plot(pic)
+}  
+
+# plot generalizations across the food web 
+makeplot(gen[1:n])
+```
+
+

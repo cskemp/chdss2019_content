@@ -1,0 +1,64 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Probabilistic models</h1></div>'
+author: "Charles Kemp"
+date: "CHDSS 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, progress = TRUE)
+```
+
+```{r packageload, message=FALSE}
+library(here)
+library(tidyverse)
+library(ggplot2)
+```
+
+## Bayesian cognitive models vs Bayesian Data analysis
+
+## Probability distributions
+
+
+```{r coughing_friend_prior, fig.height=2, fig.width=4}
+h  <- c('cold', 'emphysema', 'stomach upset')
+p_h <- c(0.46, 0.04, 0.4)
+prior <- tibble(h, val=p_h, dist='prior P(h)')
+
+plotdiseasechart <- function(d) {
+  pic <- d %>%
+    ggplot(aes(x=h, y = val)) +
+    scale_y_continuous(lim=c(0,1)) +
+    geom_col() +
+    facet_grid(dist ~ .)  +
+    xlab("hypothesis")
+  plot(pic)
+}
+
+plotdiseasechart(prior)
+```
+
+
+```{r coughing_friend_likelihood, fig.height=2, fig.width=4}
+p_d_given_h <- c(0.4, 0.4, 0.05)
+likelihood  <- tibble(h, val=p_d_given_h, dist='likelihood P(D|h)')
+plotdiseasechart(likelihood)
+```
+
+
+```{r coughing_friend_posterior, fig.height=2, fig.width=4}
+# update prior by multiplying by likelihood
+p_h_given_d <- p_d_given_h * p_h
+# "normalise" the posterior so that it sums to 1
+p_h_given_d <- p_h_given_d / sum(p_h_given_d)
+posterior  <- tibble(h, val=p_h_given_d, dist='posterior P(h|D)')
+plotdiseasechart(posterior)
+```
+
+
