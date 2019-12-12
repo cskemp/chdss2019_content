@@ -21,31 +21,17 @@ Project organization is unglamorous but *extremely* important. Organizing your p
 
 ## Starting a new project
 
-Danielle Navarro has created a repository that you can use as a template. Open a terminal, navigate to the CHDSS folder on your desktop and type
+Let's say that you're about to start a project on memory for pitch, and you'd like to create a new repository called `pitchmemory`.
+Danielle Navarro has created a template that you can use to initialize your new repository. Go to [https://github.com/djnavarro/newproject/](https://github.com/djnavarro/newproject/) and click on the green button labelled "Use this template":
 
-```{}
-> git clone  https://github.com/djnavarro/newproject
+![](./images/usethistemplate.png)
+
+A window will come up allowing you to name the new repository -- call it `pitchmemory`. Now navigate into your 
+ `Desktop/CHDSS` folder and clone the repository. I'd type
+ ```{}
+> git clone  https://github.com/cskemp/pitchmemory.git
 ```
 
-You can now use the folders in this repository as a starting point whenever you create a new project yourself. Let's say that you're about to start a project on memory for pitch. Create a new folder in your CHDSS folder called `pitchmemory`. Then copy all of the files from the `newproject` repository into your `pitchmemory` folder --- you can do this manually or type 
-
-```{}
-> cp -r newproject/* pitchmemory
-```
-
-If you navigate into the `pitchmemory` folder and type 
-
-```{}
-> git status
-```
-
-you should see
-
-```{}
-fatal: not a git repository (or any of the parent directories): .git
-```
-
-which is good, and means that the `pitchmemory` folder is not linked with Dani's `newproject` repository. That way you can add `pitchmemory` to GitHub later as your own repository if you like. (If it turns out that `pitchmemory` already is a git repository, you probably included the `.git/` folder when you copied everything into `pitchmemory`, and should simply delete the `.git/` folder from `pitchmemory`) 
 
 ## Folder structure
 If you open up the `pitchmemory` folder you'll see something like:
@@ -84,7 +70,7 @@ So, why work in projects? As I see it, there are two kinds of reason, both of wh
 
 ### Creating a project 
 
-The `pitchstudio` folder already has a file called `newproject.Rproj` that was inherited from Dani's `newproject` repository. Rename this file to `pitchmemory.Rproj` to match the name of your repository. 
+The `pitchstudio` folder already has a file called `newproject.Rproj` that came from Dani's template. Rename this file to `pitchmemory.Rproj` to match the name of your repository. 
 
 To see how to create a RStudio project from scratch, let's add one to the `summerschool` repository you created when learning about Git. Go to the the little blue menu in the top the top right corner in RStudio, click on the dropdown menu, and select "New Project".
 
@@ -148,4 +134,3 @@ R Markdown can be used for many purposes, and we give only a handful of examples
 
  - You can write academic papers in R Markdown! One example is in   `CHDSS/chdss2019_content/samplingframes/writeup/samplingframes.Rmd`   To Knit it (which creates a pdf in this case), you'll need to install the papaja package as described [here.](https://github.com/crsh/papaja)
  
-
