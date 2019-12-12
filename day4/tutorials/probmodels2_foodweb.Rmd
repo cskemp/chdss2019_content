@@ -20,7 +20,7 @@ library(here)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
-```
+  ```
 
 ## Foodweb problem
 
@@ -153,6 +153,93 @@ makeplot <- function(gen, plotname) {
 
 # plot generalizations across the food web 
 makeplot(gen[1:n])
+```
+
+## Inference by sampling from the prior
+
+```{r naivesampling, fig.width=6,  fig.height=3}
+# Sample a hypothesis from the prior
+
+sample_h <- function() {
+  tfvals <- c(1,2)
+  h <- list()
+  h$kelp <- sample(tfvals, 1, prob=cpds$kelp)
+  h$herring <- sample(tfvals, 1, prob=cpds$herring[h$kelp,])
+  h$dolphin <- sample(tfvals, 1, prob=cpds$dolphin[h$herring,])
+  h$tuna <- sample(tfvals, 1, prob=cpds$tuna[h$herring,])
+  h$sandshark <- sample(tfvals, 1, prob=cpds$sandshark[h$herring,])
+  h$mako <- sample(tfvals, 1, prob=cpds$mako[h$dolphin,h$tuna,])
+  h$human <- sample(tfvals, 1, prob=cpds$human[h$mako,])
+
+  return(h)
+}
+
+nsample <- 1000
+samples <- data.frame((matrix(NA, nrow = nsample, ncol = n)))
+colnames(samples) <- speciesnames
+samples <- as.tibble(samples)
+for (i in 1:nsample) {
+  samples[i,] <- sample_h()
+}
+
+samples$consistent <- NA
+
+# compute whether each sample is consistent with the observations
+for (i in 1:nsample) {
+  samples$consistent[i] <- p_obs_given_h(obs, samples[i,])
+}
+
+consistentHypotheses <- as.logical(samples$consistent)
+consistentsamples <- samples[consistentHypotheses,1:n]
+gen <- samples[1,]
+for( animalname  in speciesnames ) {
+    # for each species compute the proportion of consistent samples for which
+    # it takes value TRUE
+    gen[animalname] <- mean( consistentsamples[[animalname]] ) - 1
+    # NB: we need to subtract 1 from the mean because we're using 1 and 2 for TRUE and FALSE instead of 0 and 1
+}
+
+makeplot(gen[1:n])
+```
+
+## Inference by Gibbs sampling using RJags
+
+```{r jags, eval=TRUE,  fig.width=6, fig.height=3}
+library(rjags)
+library(tidybayes)
+
+
+foodwebdata<- c(obs, list(
+      p.kelp = zerop,
+      p.herring = onep,
+      p.dolphin = onep,
+      p.tuna = onep,
+      p.sandshark = onep,
+      p.mako = twop,
+      p.human = onep))
+
+# set up the model in JAGS
+jags <- jags.model('foodweb.bug', data = foodwebdata,
+                   n.chains = 4,
+                   n.adapt = 100)
+
+# actually run the model in JAGS (ie sample from the posterior P(h|obs) )
+samples <- coda.samples(jags,
+             c('kelp', 'herring', 'dolphin', 'tuna', 'sandshark', 'mako', 'human'),
+             10000)
+
+# for each species extract the proportion of samples for which it is TRUE. For today's session don't worry about the details of this function.
+
+genplot <- samples %>%
+        gather_draws(kelp, herring, dolphin, tuna, sandshark, mako, human) %>%
+        rename(species=.variable, gen=.value) %>%
+        ungroup() %>%
+        select(species, gen) %>%
+        mutate(species= factor(species, levels=speciesnames)) %>%
+        group_by(species) %>%
+        summarize(gen=mean(gen)-1)
+
+makeplot(spread(genplot, species, gen))
 ```
 
 
