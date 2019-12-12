@@ -1,2 +1,2 @@
-# Notebooks
+# Tutorials
 

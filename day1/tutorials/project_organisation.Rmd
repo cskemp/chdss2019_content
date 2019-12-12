@@ -1,0 +1,151 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 1: Project organization </h1></div>'
+author: "Danielle Navarro and Charles Kemp"
+date: "CHDSS 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Why care about project organization? 
+
+Project organization is unglamorous but *extremely* important. Organizing your project files well from the start will make life much easier for you and anyone else who might be collaborating on the project. Many times in my life I've come back to a project that I previously looked at weeks, months or years ago, and had a very difficult time figuring out what I was doing and where I'd put critical files. A lot of this pain could have been avoided by following the suggestions in this notebook! 
+
+## Starting a new project
+
+Danielle Navarro has created a repository that you can use as a template. Open a terminal, navigate to the CHDSS folder on your desktop and type
+
+```{}
+> git clone  https://github.com/djnavarro/newproject
+```
+
+You can now use the folders in this repository as a starting point whenever you create a new project yourself. Let's say that you're about to start a project on memory for pitch. Create a new folder in your CHDSS folder called `pitchmemory`. Then copy all of the files from the `newproject` repository into your `pitchmemory` folder --- you can do this manually or type 
+
+```{}
+> cp -r newproject/* pitchmemory
+```
+
+If you navigate into the `pitchmemory` folder and type 
+
+```{}
+> git status
+```
+
+you should see
+
+```{}
+fatal: not a git repository (or any of the parent directories): .git
+```
+
+which is good, and means that the `pitchmemory` folder is not linked with Dani's `newproject` repository. That way you can add `pitchmemory` to GitHub later as your own repository if you like. (If it turns out that `pitchmemory` already is a git repository, you probably included the `.git/` folder when you copied everything into `pitchmemory`, and should simply delete the `.git/` folder from `pitchmemory`) 
+
+## Folder structure
+If you open up the `pitchmemory` folder you'll see something like:
+
+![](./images/folderstructure1.png)
+
+Each folder includes a README, so poking around and reading them will give you a sense of the intended purpose of each folder. Here we'll give a high-level overview.
+
+### experiments
+If this is an experimental project, the `analysis` folder will contain a sub-folder for each experiment. These sub-folders include source code for the experiment (if it is computerized) and raw data.
+
+### data
+The `data` folder includes cleaned data files only. Scripts for cleaning the data are in `preprocessing` --- these scripts read from the raw data files in `experiments` and write to `data`.
+
+### analysis
+Scripts for analyzing the cleaned data and running statistical tests go in the `analysis` folder. 
+
+### model
+If the project includes one or more computational models, they go in the `model` folder.
+
+### writeup
+The `writeup` folder includes talks, posters and manuscripts that describe the project.
+
+## RStudio projects
+
+The folder for the `pitchmemory` project is now well on the way, and normally you will also have folders for several other projects that you work on from time to time. It's useful to turn each of these projects into an [RStudio project](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects). According to the developers, these RStudio projects
+
+> make it straightforward to divide your work into multiple contexts, each with their own working directory, workspace, history, and source documents
+
+Normally, R keeps track of various different events that have happened in your previous work, but it has no idea which events are associated with which "project". An RStudio project creates a `.Rproj` file that links the different scripts, data sets, etc within a particular folder on your computer. 
+So, why work in projects? As I see it, there are two kinds of reason, both of which are valid:
+
+- *Convenience*. By working in projects, RStudio will help you keep things tidy, and it smooths the process in many ways.
+- *Functionality.* The fact that RStudio projects leave a `.Rproj` file located at the "root" of your project serves as a useful anchor for other packages. For instance, there are packages (e.g., the `here` package) that can detect the `.Rproj` file and allow you to define the location of files relative to the project root. This is 
+*incredibly* useful when sharing your code with other people!
+
+### Creating a project 
+
+The `pitchstudio` folder already has a file called `newproject.Rproj` that was inherited from Dani's `newproject` repository. Rename this file to `pitchmemory.Rproj` to match the name of your repository. 
+
+To see how to create a RStudio project from scratch, let's add one to the `summerschool` repository you created when learning about Git. Go to the the little blue menu in the top the top right corner in RStudio, click on the dropdown menu, and select "New Project".
+
+![](./images/new_rstudio_project1.jpg)
+
+This will bring up a dialog box that provides a few different optons. Because we're going to work in the existing folder that we created for the git tutorial (`~\Desktop\CHDSS\summerschool`), select "existing directory" and then browse for the correct location. 
+
+
+![](./images/new_rstudio_project2.jpg)
+![](./images/new_rstudio_project3.jpg)
+
+
+Once you've created the project, if you have a look at the folder in Windows Explorer / Mac Finder, you'll see a new file called `summerschool.Rproj`:
+
+![](./images/new_rstudio_project4.jpg)
+
+Done. You now have an RStudio project. Any time you want to switch between projects, use the drop down menu. RStudio will automatically change the working directory, start a new R session for you, and open up whatever files you had open last time you were using it. 
+
+
+## R Markdown documents
+
+Documentation is often written using *markdown* --- for example, you used markdown earlier today when writing the README for your `summerschool` repository. R Markdown allows you to combine documentation and code in a way that is extremely convenient. 
+
+Let's create a R Markdown document in your `summerschool` repository. First switch to the `summerschool` project in RStudio if you are not there already. Then use the Rstudio file menu to create a new R Markdown document:
+
+![](./images/new_rmarkdown.jpg)
+
+Give your document a title and choose output type, which we'll assume to be HTML. 
+
+![](./images/new_rmarkdown2.jpg)
+
+This creates an untitled R Markdown document in the source pane:
+
+![](./images/new_rmarkdown3.jpg)
+
+Save it in your `summerschool` repository with the name `exploration.Rmd`. So now you have this:
+
+![](./images/new_rmarkdown4.jpg)
+
+Render your R Markdown document by clicking the `Knit` button. The result is an .html file that can be seen in the Viewer pane on the right side of RStudio.
+
+
+### Structure of an R Markdown document
+
+- the bit at the top is the "yaml header" (ignore it for now)
+- anything shaded in grey (between the backticks) is a *code chunk* and is treated just like an R script
+- anything in white treated like Markdown. 
+
+Play around with this for a bit, and get a feel for how it works!
+
+## When to use R Markdown documents
+
+R Markdown can be used for many purposes, and we give only a handful of examples here.
+
+- R Markdown is a good choice for preprocessing and analyzing data, and the `preprocessing` and `analysis` folders in our recommended structure will often contain R Markdown files. In both cases it is useful to combine code with comments that explain and motivate preprocessing steps, and that interpret and discuss the results of statistical analyses.
+
+- Most of the summer school tutorials were created in R Markdown. For example, you can find the source of this tutorial in 
+`CHDSS/chdss2019_content/day1/tutorials/project_organisation.Rmd`
+
+- You can make slides in R Markdown. Try creating a new R Markdown file from the RStudio file menu and choosing the "Presentation" option
+
+ - You can write academic papers in R Markdown! One example is in   `CHDSS/chdss2019_content/samplingframes/writeup/samplingframes.Rmd`   To Knit it (which creates a pdf in this case), you'll need to install the papaja package as described [here.](https://github.com/crsh/papaja)
+ 
+

@@ -219,6 +219,7 @@ If you click on the `Preview` button, RStudio will show you the pretty version t
 ![](./images/readme_rstudio2.jpg)
 
 You can see the actual markdown on the left hand side, and the preview of the output on the right hand side. 
+Edit your own README.md and try out some of the possibilities allowed by markdown. If you'd like to see my edited version as a starting point, you can find it at `CHDSS/chdss2019_content/day1/tutorials/markdown.md`
 
 Make sure you save the document after you've made your changes! 
 
