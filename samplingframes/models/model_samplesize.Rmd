@@ -1,0 +1,238 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Modeling category and property sampling</h1></div>'
+author: "Charles Kemp"
+date: "CHDSS 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, progress = TRUE)
+```
+
+```{r packageload, message=FALSE}
+library(here)
+library(MASS)
+library(tidyverse)
+require(rjags)
+library(ggplot2)
+```
+
+
+## Prior distribution
+
+```{r prior}
+# consider 7 spheres of different sizes
+ncat <- 7
+# suppose that the 7 spheres are equally spaced along the size dimension
+test <- 1:ncat
+
+# parameter specifying mean of the Gaussian process 
+m <- 0
+# parameters specifying covariance of the Gaussian process
+sigma <- .5
+tau <- 1.5
+rho <- .1
+
+mean_gp <- rep(NA, ncat)
+cov_gp <- array(NA, c(ncat, ncat))
+
+# mean and covariance matrix defining the Gaussian process
+for(i in 1:ncat) {
+  mean_gp[i] <- m
+  cov_gp[i,i] <- (sigma^2) + (tau^2)
+  if (i<7) {
+    for(j in (i+1):ncat) {
+      cov_gp[i,j] <- (tau^2) * exp(-rho * (test[i] - test[j])^2)
+      cov_gp[j,i] <- cov_gp[i,j]
+    }
+  }
+}
+
+# sample functions from the Gaussian process
+nsample <- 6
+samples <-  mvrnorm(n=nsample,mean_gp, cov_gp)
+
+# define logistic transformation which maps real numbers to probabilities
+logistic <- function(x) {
+ return(1/(1+exp(-x)))
+}
+
+# apply the logistic transformation to the samples
+category_means <- apply(samples, 1:2, logistic)
+
+# plot the samples
+
+category_means <- as_tibble(category_means) %>%
+    set_names(c("1", "2", "3", "4", "5", "6", "7"))
+category_means$samplenum <- paste("sample", 1:nsample)
+
+tidymeans <- gather(category_means, cat, value, -samplenum)
+
+pic <- tidymeans %>%
+  ggplot(aes(x = cat, y = value, group=1)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~samplenum) +
+  scale_y_continuous(lim=c(0,1)) +
+  xlab("sizes") +
+  ylab("prob of plaxium coating")
+    
+plot(pic)
+```
+
+
+```{r jags, cache=TRUE}
+
+# Script for running the sampling frames model using JAGS
+# The code will give you some warnings about unused variables when you run it -- don't worry about them
+
+make <- function(bugfile, obs = list()) {
+  
+  # parameters
+  settings <- function(obs) {
+    
+    # by default there are 10 categories, although the experiment only
+    # asks about 7
+    if(!exists("ncat",obs)) obs$ncat <- 10
+    
+    # add locations for the categories
+    obs$test <- 1:obs$ncat
+    
+    # add the dummy variables for the positive observations
+    # (plaxium = 1)
+    obs$plaxium <- rep.int(1,obs$nobs)
+    
+    # by default the prior over base rates is symmetric 
+    # dirichlet with concentration .35
+    if(is.null(obs$alpha)) {
+      obs$alpha <- rep.int(.35,obs$ncat)
+    }
+    
+    # default parameters for the gaussian process
+    if(!exists("sigma",obs)) obs$sigma <- .5
+    if(!exists("tau",obs)) obs$tau <- 1.5
+    if(!exists("rho",obs)) obs$rho <- .1
+    # curves will have a mean of 0.5
+    if(!exists("m",obs)) obs$m <- 0 
+     
+    return(obs)
+  }
+  
+  # initialise
+  model <- list()
+  
+  # simulation parameters
+  model$opt <- list(
+    burnin = 20000,
+    its = 100000,
+    nchains = 1,
+    thin = 10
+  )
+
+  # data to be given to JAGS
+  model$obs = settings(obs)
+  
+  # store the jags model specification as a string
+  model$string <- paste0(
+    readLines(bugfile), 
+    collapse="\n"
+  )
+  
+  # construct the jags model object
+  model$jagsmod <- jags.model(
+    file = textConnection(model$string),
+    n.adapt = model$opt$burnin,
+    n.chains = model$opt$nchains,
+    data = model$obs
+  )
+  
+  # draw samples
+  model$samples <- jags.samples(
+    model = model$jagsmod, 
+    variable.names = c("category_means"), 
+    n.iter = model$opt$its,
+    thin = model$opt$thin
+  )
+  
+  # add a convenient summary
+  model$out <- data.frame(
+    test = model$obs$test,
+    category_means  = apply(model$samples$category_means, 1, mean)
+  )
+  
+  return(model)
+}
+
+sim <- list()
+
+# --- simulations for sample size experiment---
+
+sim$category_n2 <- make(
+  bugfile = here("models","category.bug"),
+  obs = list(nobs = 2, category = c(1,2))
+)
+
+sim$category_n6 <- make(
+  bugfile = here("models","category.bug"),
+  obs = list(nobs = 6, category = rep.int(c(1,2),3))
+)
+
+sim$category_n12 <- make(
+  bugfile = here("models","category.bug"),
+  obs = list(nobs = 12, category = rep.int(c(1,2),6))
+)
+
+sim$property_n2 <- make(
+  bugfile = here("models","property.bug"),
+  obs = list(nobs = 2, category = c(1,2))
+)
+
+sim$property_n6 <- make(
+  bugfile = here("models","property.bug"),
+  obs = list(nobs = 6, category = rep.int(c(1,2),3))
+)
+
+sim$property_n12 <- make(
+  bugfile = here("models","property.bug"),
+  obs = list(nobs = 12, category = rep.int(c(1,2),6))
+)
+```
+
+```{r plotresults}
+get_out <- function(mod, cond, samp) {
+  out <- mod$out
+  names(out)[2] <- "prediction" 
+  out$sample_size<- samp
+  out$condition <- cond
+  return(out)
+}
+
+output <- rbind(
+  get_out(sim$category_n2, "category", "small"),
+  get_out(sim$property_n2, "property", "small"),  
+  get_out(sim$category_n6, "category", "medium"),
+  get_out(sim$property_n6, "property", "medium"),  
+  get_out(sim$category_n12, "category", "large"),
+  get_out(sim$property_n12, "property", "large") 
+)
+
+output<- output%>%
+  mutate(sample_size = factor(sample_size, levels = c("small","medium","large"))) %>%
+  # plot results only for the first seven categories along the size dimension
+  filter(test <= 7)
+
+pic2 <- output  %>%
+  ggplot(aes(x = test, y = prediction, colour = condition)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~sample_size)
+plot(pic2)
+
+```
+  
