@@ -25,7 +25,27 @@ library(BayesFactor)
 frames <- read_csv(here("samplingframes", "data", "data_samplesize.csv"))
 ```
 
-After exploring and visualizing the sampling frames data yesterday, you have some idea of what they look like. Below is a summary plot that shows how generalization curves varied across both conditions (category, property) and sample sizes (small, medium, large).
+## What this section is not 
+ 
+Because R is a *statistical* programming language it comes with a lot of hypothesis tests and tools built in, and of course there is an overwhelming number of packages out there that extend this. It is impossible to cover the whole thing in one tutorial, so I'm going to be a little picky. For example, I'm going to skip over the most commonly used classical tests, because they're comparatively easy to learn and it's not the best use of our time! For future reference though: 
+
+- The `t.test()` function handles one-sample, independent samples and paired samples t-tests 
+- The `chisq.test()` function handles chi-square tests of independence and Pearson goodness of fit tests 
+- The `prop.test()` function tests for the equality of two proportions. 
+- The `binom.test()` function allows you to do a binomial test of choice proportion against a known rate 
+- The `wilcox.test()` function handles one- and two-sample nonparametric tests of equality of means 
+- The `cor.test()` function tests the significance of a correlation 
+ 
+Of course, there are many, many others! What we're going to focus on here is: 
+ 
+- Linear modelling with the `lm()` function, and model comparison using the `anova()` function 
+- Bayesian regression using the `brm()` function (in the `brms`) package, and model comparison using Bayes factors 
+- Linear mixed models with the `lmer()` function (in the `lme4` package) 
+- Generalised linear mixed models with the `glmer()` function (also from `lme4`)
+
+
+One of our goals is to get to the point where we can analyze the sampling frames data from yesterday.  After exploring and visualizing these data yesterday, you have some idea of what they look like. 
+ Below is a summary plot that shows how generalization curves varied across both conditions (category, property) and sample sizes (small, medium, large).
 
 ```{r expsummary, show=FALSE, message=FALSE}
 frames_avg <- frames %>%
@@ -39,16 +59,16 @@ frames_avg <- frames %>%
     ) %>%
   ungroup()
 
-expsummary <- frames_avg %>%
+frames_avg %>%
   ggplot(aes(x = test_item, y = response, colour = condition)) +
   geom_line() +
   geom_point() +
   geom_errorbar(aes(ymin = response - se, ymax = response + se)) +
   facet_wrap(~sample_size)
-plot(expsummary)
 ```
 
-This tutorial has two goals: (1) to give a general introduction to statistical analyses in R, and (2) to work towards a set of analyses that could be included in a paper on the sampling frames project. Because of the first goal, some of the analyses are included only to illustrate statistical concepts --- they probably wouldn't be analyses we'd run if we were interested in the sampling frames data alone.
+But the analyses towards the start of this tutorial are included mainly to illustrate statistical concepts --- they wouldn't be analyses we'd run if we were interested only in the sampling frames project. 
+
 
 ## Linear models
 
@@ -144,7 +164,7 @@ Let's look at `mod2` in a bit more detail. The model is based on the equation:
 \end{equation}
 which says that the $i$th value of the response variable is equal to the sum of three terms. $\beta_0$ is the intercept, $\beta_1$ corresponds to the variable called `conditionproperty` in the summary of mod2 above, and $\epsilon_i$ is an error term (also called residual). Here $\text{condition}$ is a variable that takes value 1 when the $i$th data point is from the property sampling condition, and 0 otherwise.
 
-Intuitively, we want to find values of $\beta_0$ and $\beta_1$ that make the error terms as small as possible. When fitting the model, the `lm` package computed values that minimize the sum squared error $\sum_i \epsilon_i^2$.
+Intuitively, we want to find values of $\beta_0$ and $\beta_1$ that make the error terms as small as possible. When fitting the model, `lm()` computed values that minimize the sum squared error $\sum_i \epsilon_i^2$.
 
 ## Bayesian regression
 
@@ -160,10 +180,7 @@ For our regression example, we're going to assume that the error terms $\epsilon
 
 $$ \epsilon_i \sim N(0, \sigma^2)$$
 So the hypotheses we're interested in are triples $(\beta_0, \beta_1, \sigma)$ that 
-specify different values of $\sigma$ and the coefficients $\beta_0$ and $\beta_1$ in the regression equation above. We use the `brm` package (and its default priors) to sample from the posterior distribution $P(\beta_0, \beta_1, \sigma | D)$
-
-get_variables
-prior_summary
+specify different values of $\sigma$ and the coefficients $\beta_0$ and $\beta_1$ in the regression equation above. We use the `brm()` function (and its default priors) to sample from the posterior distribution $P(\beta_0, \beta_1, \sigma | D)$
 
 ```{r cache=TRUE, eval=TRUE}
 mod2_bayes <- brm(
@@ -175,7 +192,7 @@ mod2_bayes <- brm(
 
 Let's visualize the posterior distributions:
 
-```{r fig.height=3, fig.width=6}
+```{r warning=FALSE, fig.height=3, fig.width=6}
 mod2_bayes_samples_wide <- mod2_bayes %>% 
   spread_draws(b_Intercept, b_conditionproperty, sigma)
 
@@ -183,6 +200,7 @@ mod2_bayes_samples <- mod2_bayes_samples_wide %>%
   gather(key='variable', value = "value", b_Intercept, b_conditionproperty, sigma)
   
 mod2_bayes_samples %>%  
+  mutate(variable=factor(variable, levels=c('b_Intercept', 'b_conditionproperty', 'sigma'))) %>% 
   ggplot(aes(x = value)) +  
   geom_density() +  
   facet_wrap(~variable)
@@ -201,23 +219,22 @@ BF_{21} &= \frac{P(M_2 | D)}{P(M_1 | D)} \\
 \end{align}
 where the final step is valid only if we assume (as people often do) that the two models have equal prior probabilities.  Note that $P(D|M_2)$ is a *marginal likelihood* -- it's computed by marginalizing out the three variables $\beta_0$, $\beta_1$ and $\sigma$. For us the equation isn't really important (so feel free to skip) but here it is for those who are interested:
 \begin{align}
-P(D|M_2) = \int P(D|\beta_0, \beta_1, \sigma, M_2) P(\beta_0, \beta_1, \sigma | M_2) d\beta_0 d\beta_1 d\sigma \\
+P(D|M_2) &= \int P(D|\beta_0, \beta_1, \sigma, M_2) P(\beta_0, \beta_1, \sigma | M_2) d\beta_0 d\beta_1 d\sigma \\
          &=  \int P(D|\beta_0, \beta_1, \sigma, M_2) P(\beta_0)P(\beta_1) P(\sigma)d\beta_0 d\beta_1 d\sigma
 \end{align}
 
-Bayes factors automatically control for model complexity -- e.g. the fact that $M_2$ has one more parameter than $M_1$. They are often interpreted on the following scale:
+Bayes factors automatically control for model complexity -- e.g. the fact that $M_2$ has one more parameter than $M_1$. Kass & Raftery suggest interpreting them as follows:
 
 | Value               | Interpretation |
 |---------------------|:----------------|
 | $BF_{21} < 1$        | Negative: supports $M_1$ rather than $M_2$ |
 | $1 < BF_{21} < 3$    | Barely worth mentioning |
-| $3 < $BF_{21} < 10$   | Substantial |
-| $10 < $BF_{21} < 30$  | Strong  |
-| $30 < $BF_{21} < 100$ | Very Strong |
-| $100 < $BF_{21} $     | Extremely Strong |
+| $3 < BF_{21} < 10$   | Substantial |
+| $10 < BF_{21} < 100$  | Strong  |
+| $100 < BF_{21}$     | Decisive | 
 
 
-Let's set up the simpler model $M_1$ and compute a Bayes factor comparing $M_1$ with $M_2$:
+Let's set up the simpler model $M_1$ and compute a Bayes factor comparing $M_2$ with $M_1$:
 
 ```{r cache=TRUE, eval=TRUE}
 
@@ -229,15 +246,10 @@ mod1_bayes <- brm(
 
 BF <- bayes_factor(mod2_bayes, mod1_bayes)
 
-print(BF)
-
+cat('Bayes factor comparing mod2_bayes to mod1_bayes is', BF$bf)
 ```
 
-In practice we should use more iterations than we get by default when estimating the Bayes factor. But the overall message seems clear --- there is overwhelming support for $M_2$ (which includes a term for `condition`) relative to $M_1$ (which does not). In the output here, note that bridge1 is the *first* argument to the `bayes_factor()` function, and therefore corresponds to $M_2$, which is confusing.
-
-## Model checking
-
-Important: do this for frequentist, Bayesian approaches.
+In practice we should use more iterations than we get by default when estimating the Bayes factor. But the overall message seems clear --- there is overwhelming support for $M_2$ (which includes a term for `condition`) relative to $M_1$ (which does not). 
 
 ### Multiple predictors
 
@@ -272,16 +284,19 @@ In this ANOVA table, what you're looking at is a test of `mod2` against `mod1`, 
 
 ### Model selection using the AIC and BIC
 
-An alternative approach is to compare the three models using a statistic that accounts for model complexity. Even if a more complex model (e.g. mod3) fits the data slightly better than its competitors, i
+An alternative approach is to compare the three models using a statistic that accounts for model complexity.  A simple model that accounts for just the pattern of data observed seems better than a complex model that is flexible enough to fit many patterns of data, including the pattern observed as well as many others. The same conclusion holds if the more complex model  fits the data slightly better -- probably it does better by virtue of its flexibility,  not because it is closer  to the truth.
 
-Akaike information criterion (AIC) and the Bayesian information criterion (BIC), both of which have been around since the 1970s. For our linear models, we can evaluate them using the `AIC()` and `BIC()` functions: 
+Two scoring measures that take model complexity into account are the  Akaike information criterion (AIC) and the Bayesian information criterion (BIC), both of which have been around since the 1970s. For our linear models, we can evaluate them using the `AIC()` and `BIC()` functions: 
 
 ```{r}
 AIC(mod1, mod2, mod3)
 BIC(mod1, mod2, mod3)
 ```
 
-Smaller values of AIC and BIC are better, and it's hardly a surprise that `mod2` turns out to be the best one!
+Smaller values of AIC and BIC are better, and it's hardly a surprise that `mod2` turns out to be the best one! We won't go into the definitions of the AIC and BIC here, and mention just two points. First, both criteria include a term that penalizes a model based on the number of parameters that it includes (having more parameters is worse). Second, the BIC score for a model $M$ closely approximates the Bayes factor $P(D|M)$ when the Bayes factor assumes one particular prior on the model parameters.
+
+Instead of comparing the models using the BIC, we could fit a Bayesian regression model with age as an additional predictor (ie  `mod3_bayes`), and compare the three Bayesian regression models by  computing Bayes factors. In the interests of time, however, we'll focus mainly on frequentist approaches from here on, although each analysis presented has a Bayesian counterpart.
+
 
 ### Exploring the model
 
@@ -298,26 +313,6 @@ TODO:
 - the `residuals()` function
 - regression diagnostics using `plot()`
 
-
-### Bayesian regression with multiple predictors
-
-```{r cache=TRUE, eval=TRUE}
-mod3_bayes <- brm(
-  formula = response ~ condition + age, 
-  data = tinyframes, 
-  save_all_pars = TRUE
-)
-```
-
-
-```{r cache=TRUE, eval=TRUE}
-
-# cut this?
-BF <- bayes_factor(mod3_bayes, mod2_bayes)
-
-print(BF)
-
-```
 
 ## Mixed models
 
@@ -442,7 +437,6 @@ TODO:
 
 At long last, we are at the point where we might be able to construct a sensible model for the *actual* `frames` data. To guide us in this process, let's plot the raw data for 20 randomly chosen subjects. This is pretty important, because each person is providing 21 responses that we expect to be related to one another in a systematic way, but we might not be completely sure what structure we'll find. 
 
-
 ```{r}
 whichids <- sample(unique(frames$id), 20) 
 frames %>%
@@ -484,7 +478,7 @@ linframes$modelfit <- predict(linframes2)
 linframes$residuals <- residuals(linframes2)
 ```
 
-Now that we have a model, let's see how well it holds up under a good old-fashioned eyeball test. Here are the model predictions (lines) plotted against the raw ata for the same 20 participants:
+Now that we have a model, let's see how well it holds up under a good old-fashioned eyeball test. Here are the model predictions (lines) plotted against the raw data for the same 20 participants:
 
 ```{r} 
 linframes %>%
@@ -496,7 +490,6 @@ linframes %>%
 ```
 
 It's okay, I guess, but a little less than ideal. There are some clear nonlinearities in the data. At the individual-subject level, some responses look linear, others look S-shaped, and others look curvilinear. It would be nice to capture this in the model.
-
 
 ## Generalised linear mixed models
 
@@ -554,9 +547,7 @@ It's taken us a while, but I think we're now at the stage where we could reasona
 Remember this?
 
 ```{r}
-frames %>%
-  group_by(condition, sample_size, test_item) %>%
-  summarise(response = mean(response)) %>%
+frames_avg %>%
   ggplot(aes(x = test_item, y = response, colour = condition)) +
   geom_point() +
   geom_line() +
@@ -618,6 +609,7 @@ If you want to get more out of the data than this, statistics won't help you any
 
 If I were exploring the data without the guide of substantive theory and with no proper cognitive model to tell me where to look next, I would be *very* wary of going any further. Blindly trying to make sense of three-way interaction effects  is a terrible idea, and you'll end up chasing shadows. Nothing -- and I repeat, **NOTHING** -- in what we have done so far, is "theory". Yes, what we have here is a "model" in the sense that statisticians refer to a model, but it is *not* a cognitive model in the sense that any psychologist would care about. It is not constrained by any notion of how people are solving the reasoning problem. There is no substance here: it is purely data analysis. One of the big traps that psychologists have fallen for, time and time again over the last century, is believing that statistical models can provide a substitute for theory. Call it the *psychometric fallacy* if you will. 
 
-## What goes in the paper?
+## So what goes in the paper?
 
-So what should you *actually* do if you wanted to publish a paper with these data? See statistics_frames_journal.Rmd for three approaches.
+This tutorial has included  a number of different analyses, and you might be confused at this point about which (if any) of them should be included when writing up the experiment for publication. For some thoughts on this issue  see `chdss2019_content/samplingframes/analysis/analysis_samplesize.Rmd`
+
