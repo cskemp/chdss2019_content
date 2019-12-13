@@ -28,7 +28,7 @@ Danielle Navarro has created a template that you can use to initialize your new 
 
 A window will come up allowing you to name the new repository -- call it `pitchmemory`. Now navigate into your 
  `Desktop/CHDSS` folder and clone the repository. I'd type
- ```{}
+ ```
 > git clone  https://github.com/cskemp/pitchmemory.git
 ```
 
@@ -41,10 +41,13 @@ If you open up the `pitchmemory` folder you'll see something like:
 Each folder includes a README, so poking around and reading them will give you a sense of the intended purpose of each folder. Here we'll give a high-level overview.
 
 ### experiments
-If this is an experimental project, the `analysis` folder will contain a sub-folder for each experiment. These sub-folders include source code for the experiment (if it is computerized) and raw data.
+If this is an experimental project, the `experiments` folder will contain a sub-folder for each experiment. These sub-folders include source code for the experiment (if it is computerized) and raw data.
+
+### preprocessing
+ Scripts for cleaning the data are in `preprocessing` --- these scripts read from the raw data files in `experiments` and write to `data`. You should never edit the raw data files manually---all preprocessing (e.g. dropping incomplete records) should be done by scripts which allows others to reproduce exactly what you did.
 
 ### data
-The `data` folder includes cleaned data files only. Scripts for cleaning the data are in `preprocessing` --- these scripts read from the raw data files in `experiments` and write to `data`.
+The `data` folder includes cleaned data files only. 
 
 ### analysis
 Scripts for analyzing the cleaned data and running statistical tests go in the `analysis` folder. 
@@ -54,6 +57,41 @@ If the project includes one or more computational models, they go in the `model`
 
 ### writeup
 The `writeup` folder includes talks, posters and manuscripts that describe the project.
+
+### docs
+
+The "docs" folder on GitHub is special: if your project is set up to allow it, any files in this folder will appear as a GitHub Pages website. We therefore suggest reserving this folder in case you'd like to put the project on the web at some stage, and placing project-related documents in other directories (e.g. `writeup`)
+
+
+## Other organisation ideas
+
+The `newproject` template is a good starting point but it's worth thinking about how you could add additional structure for your own projects. For example,
+
+- The `experiments` folder could contain a subfolder called `ethics` that includes IRB applications and approvals.
+- In the `analysis` and `model` folders, I like to have subfolders called `code` and `output`. Code and scripts go in `code`, and outputs (e.g. figures and data files containing results) go in `output`. If the `output` directory were deleted it should be possible to regenerate the entire thing automatically --- so don't edit your figures and other outputs by hand.
+- You might consider having a `readings` folder where you keep articles you've read that are relevant to your project.
+
+For more thoughts about project organisation, see this [guide to reproducible code]( https://www.britishecologicalsociety.org/wp-content/uploads/2017/12/guide-to-reproducible-code.pdf).
+
+
+## File names
+
+File names matter, and should be easily readable by both humans and machines. For human readability, 
+
+- choose names that suggest what the file contains (e.g. `pitchnaming_analysis.R` is better than `pa.R`)
+- choose names that link outputs (e.g. figures) with the file that produced them (e.g. `pitchnaming_analysis_scatterplots.svg` might be produced by (`pitchnaming_analysis.R`)
+
+For machine readability.
+
+- Avoid spaces, punctuation, accented characters and case sensitivity
+-  Use delimiters to separate important information so that it can be easily recovered by a program (e.g. `data_pitchnaming_speeded.csv` and `data_pitchnaming_control.csv` might be good names if you had data for two conditions (speeded and control) in separate files)
+
+
+## Making your repository public
+
+Some people make their project repositories public from the very beginning --- this approach is consistent with the philosophy behind  [born-open data](https://link.springer.com/article/10.3758/s13428-015-0630-z).
+
+In my group we normally start with a private repository, but aim to make the repository public when a project is submitted or accepted. If you follow this approach it's important to remember that GitHub keeps a record of all the changes you've made along the way as you work on your repository. This is a feature not a bug! It means that you can easily go back to previous versions of your files if you realise that you've deleted something that you need. But it does mean that you should be careful about what goes into the repository. For example, suppose that you add a data file to the repository that includes personal information about your participants. Before making the repository public, you scrub the data file and remove all identifying information. Once the repository is public, however, people will be able to recover the original version of the data file from the time when the repository was private.
 
 ## RStudio projects
 
@@ -132,5 +170,5 @@ R Markdown can be used for many purposes, and we give only a handful of examples
 
 - You can make slides in R Markdown. Try creating a new R Markdown file from the RStudio file menu and choosing the "Presentation" option
 
- - You can write academic papers in R Markdown! One example is in   `CHDSS/chdss2019_content/samplingframes/writeup/samplingframes.Rmd`   To Knit it (which creates a pdf in this case), you'll need to install the papaja package as described [here.](https://github.com/crsh/papaja)
+ - You can write journal papers in R Markdown! One example is in   `CHDSS/chdss2019_content/samplingframes/writeup/samplingframes.Rmd`   To Knit it (which creates a pdf in this case), you'll need to install the papaja package as described [here.](https://github.com/crsh/papaja)
  
