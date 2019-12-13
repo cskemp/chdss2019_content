@@ -20,6 +20,7 @@ library(here)
 library(tidyverse)
 library(lme4)
 library(brms)
+library(tidybayes)
 library(BayesFactor)
 frames <- read_csv(here("samplingframes", "data", "data_samplesize.csv"))
 ```
@@ -135,40 +136,88 @@ This doesn't look like the output of a t-test, but if we look carefully we notic
 
 In a sense, what we've just done is illustrate the fact that the Student t-test is equivalent to a one-way ANOVA with two groups (which we were all taught as undergraduates), but we've used linear models to do it! 
 
-## Math
+## Least squares regression
 
-Explain what mod2 is actually doing with a formula.
+Let's look at `mod2` in a bit more detail. The model is based on the equation:
+\begin{equation}
+\text{response}_i = \beta_0 + \beta_1 * \text{condition}_i + \epsilon_i 
+\end{equation}
+which says that the $i$th value of the response variable is equal to the sum of three terms. $\beta_0$ is the intercept, $\beta_1$ corresponds to the variable called `conditionproperty` in the summary of mod2 above, and $\epsilon_i$ is an error term (also called residual). Here $\text{condition}$ is a variable that takes value 1 when the $i$th data point is from the property sampling condition, and 0 otherwise.
 
-## Bayesian version
+Intuitively, we want to find values of $\beta_0$ and $\beta_1$ that make the error terms as small as possible. When fitting the model, the `lm` package computed values that minimize the sum squared error $\sum_i \epsilon_i^2$.
 
-Explain that we put a priors on the regression coefficient and variance, then compute a posterior distribution after observing the data. (plot priors)
+## Bayesian regression
+
+Let's now try out a Bayesian approach to regression. Bayesian inference involves three stages:
+
+1. We start out with a prior $P(h)$ over a space of hypotheses. The prior captures our initial beliefs about which hypotheses are more or less probable.
+2. We observe some data $D$ which was generated according to a likelihood function $P(D|h)$. This likelihood function is assumed to be known -- ie for each hypothesis $h$ we know how probable the data would be if that hypothesis were true.
+3. We compute a posterior distribution $P(h|D)$ which captures our beliefs out which hypotheses are more or less probable after seeing the data. The posterior is computed by combining the prior and the likelihood:
+
+$$ P(h|D) \propto P(D|h) P(h) $$
+
+For our regression example, we're going to assume that the error terms $\epsilon_i$ are generated from a normal distribution with zero mean and variance $\sigma$:
+
+$$ \epsilon_i \sim N(0, \sigma^2)$$
+So the hypotheses we're interested in are triples $(\beta_0, \beta_1, \sigma)$ that 
+specify different values of $\sigma$ and the coefficients $\beta_0$ and $\beta_1$ in the regression equation above. We use the `brm` package (and its default priors) to sample from the posterior distribution $P(\beta_0, \beta_1, \sigma | D)$
+
+get_variables
+prior_summary
 
 ```{r cache=TRUE, eval=TRUE}
 mod2_bayes <- brm(
-  formula = response ~ condition, 
+  formula = response ~ 0 + Intercept + condition, 
   data = tinyframes, 
   save_all_pars = TRUE
 )
 ```
 
-Now compare the two versions of the regression model:
+Let's visualize the posterior distributions:
 
-Non-Bayesian:
+```{r fig.height=3, fig.width=6}
+mod2_bayes_samples_wide <- mod2_bayes %>% 
+  spread_draws(b_Intercept, b_conditionproperty, sigma)
 
-```{r eval=TRUE}
-summary(mod2)
+mod2_bayes_samples <- mod2_bayes_samples_wide %>% 
+  gather(key='variable', value = "value", b_Intercept, b_conditionproperty, sigma)
+  
+mod2_bayes_samples %>%  
+  ggplot(aes(x = value)) +  
+  geom_density() +  
+  facet_wrap(~variable)
 ```
-
-Bayesian:
-
-```{r eval=TRUE}
-summary(mod2_bayes)
-```
-
+  
+The least-squares regression model (ie the one fit using `lm()`) gave estimates of 5.4 for $\beta_0$ and -1.0 for $\beta_1$, and you can see that the Bayesian posterior distributions have most of their probability mass near these estimates. So in this case (as in many others) the Bayesian and the non-Bayesian approaches are leading to similar conclusions.
 
 ## Model comparison
 
-Formula here: explain Bayes factors
+Above we used an anova to compare regression models with and without a term for `condition`. The analogous Bayesian approach uses Bayes factors to compare two models. Let $M_2$ be the Bayesian model we specified before, and let $M_1$ be  simpler model $M_1$ that doesn't include a term for `condition`. The Bayes factor comparing the two is
+
+\begin{align}
+BF_{21} &= \frac{P(M_2 | D)}{P(M_1 | D)} \\
+        &= \frac{P(D|M_2) P(M_2)}{P(D| M_1)P(M_1)}  \\
+        &= \frac{P(D|M_2)}{P(D| M_1)} 
+\end{align}
+where the final step is valid only if we assume (as people often do) that the two models have equal prior probabilities.  Note that $P(D|M_2)$ is a *marginal likelihood* -- it's computed by marginalizing out the three variables $\beta_0$, $\beta_1$ and $\sigma$. For us the equation isn't really important (so feel free to skip) but here it is for those who are interested:
+\begin{align}
+P(D|M_2) = \int P(D|\beta_0, \beta_1, \sigma, M_2) P(\beta_0, \beta_1, \sigma | M_2) d\beta_0 d\beta_1 d\sigma \\
+         &=  \int P(D|\beta_0, \beta_1, \sigma, M_2) P(\beta_0)P(\beta_1) P(\sigma)d\beta_0 d\beta_1 d\sigma
+\end{align}
+
+Bayes factors automatically control for model complexity -- e.g. the fact that $M_2$ has one more parameter than $M_1$. They are often interpreted on the following scale:
+
+| Value               | Interpretation |
+|---------------------|:----------------|
+| $BF_{21} < 1$        | Negative: supports $M_1$ rather than $M_2$ |
+| $1 < BF_{21} < 3$    | Barely worth mentioning |
+| $3 < $BF_{21} < 10$   | Substantial |
+| $10 < $BF_{21} < 30$  | Strong  |
+| $30 < $BF_{21} < 100$ | Very Strong |
+| $100 < $BF_{21} $     | Extremely Strong |
+
+
+Let's set up the simpler model $M_1$ and compute a Bayes factor comparing $M_1$ with $M_2$:
 
 ```{r cache=TRUE, eval=TRUE}
 
@@ -184,7 +233,7 @@ print(BF)
 
 ```
 
-Warning: need more iterations than we've used here.
+In practice we should use more iterations than we get by default when estimating the Bayes factor. But the overall message seems clear --- there is overwhelming support for $M_2$ (which includes a term for `condition`) relative to $M_1$ (which does not). In the output here, note that bridge1 is the *first* argument to the `bayes_factor()` function, and therefore corresponds to $M_2$, which is confusing.
 
 ## Model checking
 
