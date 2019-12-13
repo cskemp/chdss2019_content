@@ -71,7 +71,17 @@ Frequentist and Bayesian methods can both be used to test these qualitative impr
 
 ## Frequentist approach
 
-We first fit a full model with an intercept-only random effect.
+The `day4/statistics.Rmd` notebook ended up finding that a logistic regression model with the formula
+```
+generalisation ~ condition * test_item * n_obs + (1 + test_item * n_obs|id) 
+```
+was the best at capturing the responses of individual participants. Here, however, we'll use a model with an intercept-only random effect
+```
+generalisation ~ condition * test_item * n_obs + (1|id) 
+```
+The more elaborate version of the model would be a better choice under some circumstances.  For example, if the project focused on individual differences and aimed to develop a cognitive model that accounted for data at an individual level, it would probably make sense to use the more complex version of the model for the data analysis. Here we use the simpler version because it will be easier for readers to understand, and because it parallels the Bayes factor approach that the authors actually used in the published paper.
+
+First we fit the model:
 
 ```{r glmer, cache=TRUE}
 logitmod <- glmer(
@@ -110,16 +120,18 @@ logitmod_no_n_obs <- glmer(
 
 anova(logitmod, logitmod_no_n_obs)
 
-# TODO: add 4 more reduced models, one for each of the interaction terms
+# TODO: could add 4 more reduced models, one for each of the interaction terms
 ```
 
-I'd like to say here that the results indicate that the main-effect terms for condition and test_item make an important contribution (p < 0.05 and p < 1e-15) but that the main-effect term for n_obs does not. But I don't trust this at all -- partly because of the convergence errors, partly because the AIC and BIC values don't support this conclusion. Help?
+The anova results suggest that the main-effect terms for condition and test_item make an important contribution (p < 0.05 and p < 1e-15) but that the main-effect term for n_obs does not. But the AIC and BIC scores suggest that the reduced models `logitmod_no_test_item` and `logitmod_no_n_obs` are both about as good as the full model `logitmod`. 
 
-If following this approach, the paper would include a writeup of the full model (including coefficients and standard errors) along with a writeup and interpretation of each model comparison.
+More investigation and model-checking is needed, but the basic approach here is to include a writeup  of the full model (including coefficients and standard errors) along with a writeup and interpretation of each model comparison.
 
 ##  Bayesian approach (1)
 
-We'll now use the BayesFactor package to compare the set of reduced models to the full model. The package doesn't support logistic regression so we're using linear regressions here.
+In their paper, Hayes et al report a set of Bayes factors computed using [JASP](https://jasp-stats.org) . JASP is worth knowing about --- it's a stand-alone program that allows you to load a data set then run both frequentist and Bayesian analyses using a point-and-click approach. Under the hood, JASP computes Bayes factors using the `BayesFactor` package in R, so we'll use that package here to compare a set of reduced models to the full model. 
+
+The package doesn't support logistic regression so we're using linear regressions here. Instead of specifying the random effect `(1|id)` in the model formula, we tell the package  that `id` is a random effect using `whichRandom="id"`.
 
 ```{r cache=TRUE}
 full_bf <-  lmBF( generalisation ~ condition * test_item * n_obs + id, data=fullframes, whichRandom="id")
@@ -133,16 +145,20 @@ summary(full_bf/no_test_item_bf)
 no_n_obs_bf <-  lmBF( generalisation ~ condition + test_item + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + id, data=fullframes, whichRandom="id")
 summary(full_bf/no_n_obs_bf)
 
-# TODO: add tests of interactions 
+# TODO: could add similar tests of interactions 
 ```
 
-Most of the Bayes factors are large, suggesting that the full model should be preferred to the reduced models. The one exception is the Bayes factor comparing the full model to the model without a main effect of n_obs. This Bayes factor is less than one, suggesting that the model without the main effect of n_obs should be preferred to the full model. 
+Most of the Bayes factors are large, suggesting that the full model should be preferred to the reduced models. The one exception is the Bayes factor comparing the full model to the model without a main effect of `n_obs`. This Bayes factor is less than one, suggesting that the model without the main effect of `n_obs` should be preferred to the full model. 
 
-If following this approach, the paper would include a writeup and interpretation for each of the Bayes factors computed.
+If following this approach, the paper would include a writeup and interpretation for each of the Bayes factors computed. For example, in their [paper](https://compcogscisydney.org/publications/HayesBFN_frames.pdf) Hayes et al. write
 
-# Bayesian Approach (2)
+"Property generalization decreased as the size of the test rocks increased (i.e. as they became less similar to the observed sample), BF10 > 10,000. Generalization ratings averaged across test items were higher overall for smaller than for larger samples, BF10 > 10,000. Overall generalization was also stronger following category than property sampling, BF10 > 10,000."
 
-Psychologists seem to expect hypothesis tests, so for a psychology paper I'd probably go for one of the previous two approaches. But some statisticians argue that the discrete hypothesis tests we've been using in previous sections are misguided --- if we had enough data we'd be able to tell that *all* coefficients in the regression model are present (ie non-zero). From this perspective the real question is what we should believe about the magnitudes and sizes of these coefficients --- and one way to answer this question is to report posterior distributions on these coefficients. We can achieve this using the brms package to fit a Bayesian regression model (here we use beta regression because the dependent variable is a probability).
+The Bayes factors we computed line up with these results except for the Bayes factor comparing models with and without the `n_obs` term. The reason  (I think) is that the Bayes factor reported by Hayes et al is not a comparison of just two models: instead it is an "inclusion Bayes factor" that averages over a larger set and compares those that include `n_obs` to those that do not. See [here]( https://static.jasp-stats.org/about-bayesian-anova.html) for more about inclusion Bayes factors in JASP.  There might be grounds for  using and reporting inclusion Bayes factors but we have not computed them here because they are not directly supported by the BayesFactor package.
+
+## Bayesian Approach (2)
+
+Psychologists seem to expect hypothesis tests, so for a psychology paper I'd probably go for one of the previous two approaches. But some statisticians argue that the discrete hypothesis tests we've been using in previous sections are misguided --- if we had enough data we'd be able to tell that *all* coefficients in the regression model are present (ie non-zero). From this perspective the real question is what we should believe about the magnitudes and sizes of these coefficients --- and one way to answer this question is to report posterior distributions on these coefficients. We can achieve this using the `brms` package to fit a Bayesian regression model (here we use beta regression because the dependent variable is a probability). Warning: the chunk below takes a long time to run, so set `eval = FALSE` unless you are willing to wait.
 
 
 ```{r brm, eval = TRUE, cache=TRUE}
