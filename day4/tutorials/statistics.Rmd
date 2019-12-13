@@ -21,15 +21,12 @@ library(tidyverse)
 library(lme4)
 library(brms)
 library(BayesFactor)
-frames <- read_csv(here("data", "results_frames_ex2.csv"))
+frames <- read_csv(here("samplingframes", "data", "data_samplesize.csv"))
 ```
 
-## Destination
+After exploring and visualizing the sampling frames data yesterday, you have some idea of what they look like. Below is a summary plot that shows how generalization curves varied across both conditions (category, property) and sample sizes (small, medium, large).
 
-Show picture from paper -- talk about the data
-
-```{r expsummary, message=FALSE}
-
+```{r expsummary, show=FALSE, message=FALSE}
 frames_avg <- frames %>%
   mutate(sample_size = factor(sample_size, levels = c("small","medium","large"))) %>% 
   group_by(test_item, condition, sample_size) %>%
@@ -50,8 +47,7 @@ expsummary <- frames_avg %>%
 plot(expsummary)
 ```
 
-
-Order here is backwards! First stats and then model. If you're going to build a model, suggest doing so before even running the experiment.
+This tutorial has two goals: (1) to give a general introduction to statistical analyses in R, and (2) to work towards a set of analyses that could be included in a paper on the sampling frames project. Because of the first goal, some of the analyses are included only to illustrate statistical concepts --- they probably wouldn't be analyses we'd run if we were interested in the sampling frames data alone.
 
 ## Linear models
 

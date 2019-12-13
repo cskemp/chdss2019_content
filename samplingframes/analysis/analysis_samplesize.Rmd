@@ -1,0 +1,157 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Statistical analyses for sampling frames experiment</h1></div>'
+date: "December 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, progress = TRUE)
+```
+
+```{r packageload, message=FALSE}
+library(here)
+library(tidyverse)
+library(lme4)
+library(BayesFactor)
+library(brms)
+frames <- read_csv(here("data", "data_samplesize.csv"))
+```
+
+If you'd done the sampling frames experiment, which analyses would you actually report in a paper? Here we'll give a frequentist approach and two Bayesian approaches.
+
+## Load and plot data
+
+```{r}
+fullframes <- frames %>% 
+  mutate(generalisation = (response+.1)/9.2) %>% mutate(id=factor(id)) %>% 
+  mutate(id=factor(id)) %>% 
+  mutate(sample_size = factor(sample_size, levels = c("small","medium","large"))) 
+
+fullframes_avg <- fullframes %>%
+  group_by(test_item, condition, sample_size) %>%
+  summarise(
+    n = n(),
+    sd=sd(generalisation), 
+    se=sd/sqrt(n),
+    generalisation = mean(generalisation),
+    ) %>%
+  ungroup()
+
+expsummary <- fullframes_avg %>%
+  ggplot(aes(x = test_item, y = generalisation, colour = condition)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = generalisation - se, ymax = generalisation + se)) +
+  facet_wrap(~sample_size)
+plot(expsummary)
+
+```
+
+
+Eyeballing the data it seems clear that
+
+1. responses are higher overall for the category than the property condition
+2. responses decrease as test_item increases
+3. there is an interaction between n_obs and test item (as n_obs increases, difference between small and large test items increases)
+4. there is an interaction between test item and condition (as test_item increases, difference between category and property sampling increases)
+5. there is an interaction between n_obs and condition  (as n_obs increases, difference between category and property sampling increases)
+6. there is a three-way interaction between n_obs, test item  and condition condition  (as n_obs increases, the interaction between test item and condition becomes more pronounced)
+
+On the other hand, it's not clear whether
+
+7. the average response increases or decreases as n_obs increases
+
+Frequentist and Bayesian methods can both be used to test these qualitative impressions.
+
+## Frequentist approach
+
+We first fit a full model with an intercept-only random effect.
+
+```{r glmer, cache=TRUE}
+logitmod <- glmer(
+  formula = generalisation ~ condition * test_item * n_obs + (1|id), 
+  family = gaussian(link = "logit"), 
+  data = fullframes)
+```
+
+There is a convergence issue, so we try a set of different optimization methods.
+
+```{r cache=TRUE}
+af <- allFit(logitmod)
+summary(af)
+```
+We get essentially the same estimates using several different optimization methods, so it looks like we're OK despite the convergence warning. We'll 
+now compare the full model to a set of reduced models, each of which drops one of the terms in the formula. 
+
+```{r , cache=TRUE}
+
+logitmod_no_condition <- glmer(
+  formula = generalisation ~ test_item + n_obs + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + (1|id), 
+  family = gaussian(link = "logit"), 
+  data = fullframes)
+anova(logitmod, logitmod_no_condition)
+
+logitmod_no_test_item <- glmer(
+  formula = generalisation ~ condition + n_obs + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + (1|id), 
+  family = gaussian(link = "logit"), 
+  data = fullframes)
+anova(logitmod, logitmod_no_test_item)
+  
+logitmod_no_n_obs <- glmer(
+  formula = generalisation ~ condition + test_item + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + (1|id), 
+  family = gaussian(link = "logit"), 
+  data = fullframes)
+
+anova(logitmod, logitmod_no_n_obs)
+
+# TODO: add 4 more reduced models, one for each of the interaction terms
+```
+
+I'd like to say here that the results indicate that the main-effect terms for condition and test_item make an important contribution (p < 0.05 and p < 1e-15) but that the main-effect term for n_obs does not. But I don't trust this at all -- partly because of the convergence errors, partly because the AIC and BIC values don't support this conclusion. Help?
+
+If following this approach, the paper would include a writeup of the full model (including coefficients and standard errors) along with a writeup and interpretation of each model comparison.
+
+##  Bayesian approach (1)
+
+We'll now use the BayesFactor package to compare the set of reduced models to the full model. The package doesn't support logistic regression so we're using linear regressions here.
+
+```{r cache=TRUE}
+full_bf <-  lmBF( generalisation ~ condition * test_item * n_obs + id, data=fullframes, whichRandom="id")
+
+no_condition_bf <-  lmBF( generalisation ~ test_item + n_obs + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + id, data=fullframes, whichRandom="id")
+summary(full_bf/no_condition_bf)
+
+no_test_item_bf <-  lmBF( generalisation ~ condition + n_obs + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + id, data=fullframes, whichRandom="id")
+summary(full_bf/no_test_item_bf)
+
+no_n_obs_bf <-  lmBF( generalisation ~ condition + test_item + condition:test_item + condition:n_obs + test_item:n_obs + condition:test_item:n_obs + id, data=fullframes, whichRandom="id")
+summary(full_bf/no_n_obs_bf)
+
+# TODO: add tests of interactions 
+```
+
+Most of the Bayes factors are large, suggesting that the full model should be preferred to the reduced models. The one exception is the Bayes factor comparing the full model to the model without a main effect of n_obs. This Bayes factor is less than one, suggesting that the model without the main effect of n_obs should be preferred to the full model. 
+
+If following this approach, the paper would include a writeup and interpretation for each of the Bayes factors computed.
+
+# Bayesian Approach (2)
+
+Psychologists seem to expect hypothesis tests, so for a psychology paper I'd probably go for one of the previous two approaches. But some statisticians argue that the discrete hypothesis tests we've been using in previous sections are misguided --- if we had enough data we'd be able to tell that *all* coefficients in the regression model are present (ie non-zero). From this perspective the real question is what we should believe about the magnitudes and sizes of these coefficients --- and one way to answer this question is to report posterior distributions on these coefficients. We can achieve this using the brms package to fit a Bayesian regression model (here we use beta regression because the dependent variable is a probability).
+
+
+```{r brm, eval = TRUE, cache=TRUE}
+betamod_bayes <- brm(
+  formula = generalisation ~ condition * test_item * n_obs + (1|id), 
+  family = Beta, 
+  data = fullframes)
+
+summary(betamod_bayes)
+```
+
+If following this approach, the paper would include a writeup of this single model along with plots showing posterior distributions on all coefficients.
