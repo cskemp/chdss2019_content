@@ -76,7 +76,7 @@ The next step in the process is setting up an account with a service that hosts 
 
 - Pick a sensible username, because there's a good chance it will follow you around for a long time. You can change your username, but bad things can happen.
 - When you sign up for an account it *will* need to be associated with an email address. You should pick the address that makes sense for you (probably your university account)
-- A nice feature if you have a university email address and are using GitHub for education: you can apply for a "developer" account (which are normally $7/month) for free You can apply for it by following the instructions [here](https://help.github.com/articles/applying-for-an-academic-research-discount/). It can take a few days, though mine was approved in minutes. 
+- A nice feature if you have a university email address and are using GitHub for education: you can apply for a "developer" account (which are normally $7/month) for free. You can apply for it by following the instructions [here](https://help.github.com/articles/applying-for-an-academic-research-discount/). It can take a few days, though mine was approved in minutes. 
 - **Important**: the email address that you use for GitHub needs to be the same one that you listed in the `git config` command earlier.
 
 ## Cloning other people's repositories
@@ -92,7 +92,7 @@ First, make a folder on your Desktop called CHDSS that will contain all of your 
 Now that you're in the folder where you'd like to put the repository, clone the repository by typing the following at the command line:
 
 ```{}
-> git clone https://github.com/cskemp/chdss2019_content` 
+> git clone https://github.com/cskemp/chdss2019_content 
 ```
 
 You should see something like the following:

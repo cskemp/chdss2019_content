@@ -21,7 +21,6 @@ library(tidyverse)
 library(lme4)
 library(brms)
 library(tidybayes)
-library(BayesFactor)
 frames <- read_csv(here("samplingframes", "data", "data_samplesize.csv"))
 ```
 

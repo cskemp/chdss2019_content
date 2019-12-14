@@ -172,3 +172,10 @@ R Markdown can be used for many purposes, and we give only a handful of examples
 
  - You can write journal papers in R Markdown! One example is in   `CHDSS/chdss2019_content/samplingframes/writeup/samplingframes.Rmd`   To Knit it (which creates a pdf in this case), you'll need to install the papaja package as described [here.](https://github.com/crsh/papaja)
  
+
+## Resources
+
+- [Guide to reproducible code]( https://www.britishecologicalsociety.org/wp-content/uploads/2017/12/guide-to-reproducible-code.pdf) put  together by a team of ecologists
+- [Code and data for the social sciences](https://web.stanford.edu/~gentzkow/research/CodeAndData.xhtml)
+
+
