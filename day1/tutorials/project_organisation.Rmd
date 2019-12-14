@@ -76,7 +76,7 @@ For more thoughts about project organisation, see this [guide to reproducible co
 
 ## File names
 
-File names matter, and should be easily readable by both humans and machines. For human readability, 
+File names matter, and folders and files should be named according to a consistent scheme that is easily readable by both humans and machines. For human readability, 
 
 - choose names that suggest what the file contains (e.g. `pitchnaming_analysis.R` is better than `pa.R`)
 - choose names that link outputs (e.g. figures) with the file that produced them (e.g. `pitchnaming_analysis_scatterplots.svg` might be produced by (`pitchnaming_analysis.R`)
@@ -91,7 +91,7 @@ For machine readability.
 
 Some people make their project repositories public from the very beginning --- this approach is consistent with the philosophy behind  [born-open data](https://link.springer.com/article/10.3758/s13428-015-0630-z).
 
-In my group we normally start with a private repository, but aim to make the repository public when a project is submitted or accepted. If you follow this approach it's important to remember that GitHub keeps a record of all the changes you've made along the way as you work on your repository. This is a feature not a bug! It means that you can easily go back to previous versions of your files if you realise that you've deleted something that you need. But it does mean that you should be careful about what goes into the repository. For example, suppose that you add a data file to the repository that includes personal information about your participants. Before making the repository public, you scrub the data file and remove all identifying information. Once the repository is public, however, people will be able to recover the original version of the data file from the time when the repository was private.
+In my group we normally start with a private repository, but aim to make the repository public when a project is submitted or accepted. If you follow this approach it's important to remember that GitHub keeps a record of all the changes you've made along the way as you work on your repository. This is a feature not a bug! It means that you can easily go back to previous versions of your files if you realise that you've deleted something that you need. But it does mean that you should be careful about what goes into the repository. For example, suppose that you add a data file to the repository that includes personal information about your participants.  Before making the repository public, it is somewhat tricky to remove all of the sensitive information from the repository (just scrubbing the current version of the files is not enough --- you'd also need to remove the sensitive information from the repository history). Besides, if the information were really sensitive it should probably not have been uploaded to the cloud in the first place. 
 
 ## RStudio projects
 
