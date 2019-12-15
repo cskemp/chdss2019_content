@@ -159,6 +159,16 @@ Render your R Markdown document by clicking the `Knit` button. The result is an 
 
 Play around with this for a bit, and get a feel for how it works!
 
+### Using a R Markdown document
+
+If you're working interactively with a R Markdown document, it's often useful to run a single code chunk. You can do this by clicking the "Run Current Chunk" button (small right-facing green arrow at the top of the chunk).
+
+![](./images/runchunk_rmarkdown.png)
+First, though, you'll often need to run the previous chunks so that the variables they compute are available. You can achieve this using the "Run All Chunks Above" button (the one with the arrow pointing downward). 
+
+Suppose you Knit a document and see an error --- e.g. because one chunk uses a function from a library that you haven't installed. If you don't want to fix the problem you can set `eval=FALSE` at the top of the chunk so that the chunk is not run when Knit is invoked. Other chunk options are described [here]( 
+https://bookdown.org/yihui/rmarkdown/r-code.html ). One worth knowing about is `cache=TRUE`, which means that a chunk gets rerun only if it has changed since the last time you ran it. Caching a chunk is handy if the chunk takes a long time to run.
+
 ## When to use R Markdown documents
 
 R Markdown can be used for many purposes, and we give only a handful of examples here.
@@ -176,6 +186,9 @@ R Markdown can be used for many purposes, and we give only a handful of examples
 ## Resources
 
 - [Guide to reproducible code]( https://www.britishecologicalsociety.org/wp-content/uploads/2017/12/guide-to-reproducible-code.pdf) put  together by a team of ecologists
-- [Code and data for the social sciences](https://web.stanford.edu/~gentzkow/research/CodeAndData.xhtml)
+- [Code and data for the social sciences](https://web.stanford.edu/~gentzkow/research/CodeAndData.xhtml), by Gentzkow and Shapiro 
+-  Dani Navarro's advice about  [workflow](https://slides.com/djnavarro/workflow)
+- Jenny Bryan on [how to name files](https://speakerdeck.com/jennybc/how-to-name-files)
+
 
 
