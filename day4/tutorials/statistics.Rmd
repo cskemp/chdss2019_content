@@ -306,13 +306,6 @@ summary(mod2)
 confint(mod2)
 ```
 
-TODO:
-
-- the `predict()` function
-- the `residuals()` function
-- regression diagnostics using `plot()`
-
-
 ## Mixed models
 
 To get started with mixed models, we will look at a version of the `frames` data that is a little more complex than the `tinyframes` data from the last section, but not quite the full thing yet. Specifically, what we'll do is take the (within-subject) average responses across every `test_item`, but we *won't* average across the different values of `n_obs`. That gives us a `modestframes` data set:
@@ -394,11 +387,12 @@ Overall, it looks like this new model is providing a better account of the data,
 summary(modest3)
 ```
 
-Very nice. However, if we're thinking that we might be satisfied with this model, we should now start the process of "model criticism". Let's extract the fitted values ("predictions") and add them to the data frame:
+Very nice. However, if we're thinking that we might be satisfied with this model, we should now start the process of "model criticism". Let's extract the fitted values ("predictions") and residuals and add them to the data frame:
 
 
 ```{r}
 modestframes$modelfit <- predict(modest3)
+modestframes$residuals <- residuals(modest3)
 ```
 
 One very simple check is to draw a scatterplot showing the fitted (modelled) responses against the raw data. How closely do they resemble one another?
@@ -412,7 +406,19 @@ modestframes %>%
   geom_abline(intercept = 0, slope = 1)
 ```
 
-They seem reasonably close to one another. There are hints of some systematic misfits near the edges of the response range, but nothing *too* terrible. To take a slightly closer look, let's plot the fitted values for the same 80 individuals we selected randomly earlier on:
+They seem reasonably close to one another. There are hints of some systematic misfits near the edges of the response range. Let's confirm this by plotting the residuals:
+
+```{r }
+modestframes %>% 
+  ggplot(aes( x = response, y = residuals)) +
+  geom_point() + 
+  facet_grid( condition ~ n_obs) + 
+  geom_hline( yintercept = 0)
+```
+
+So we have a problem -- the residuals tend to increase with `n_obs`. If we had a good fit, we'd be unable to see any structure in the residuals. Probably the main issue here is that the responses use a bounded scale (0 - 9), which means that we shouldn't be fitting a linear model. We'll deal with this in a later section. 
+
+It's helpful also to look at the fitted values for individuals. So let's plot the fitted values for the same 80 individuals we selected randomly earlier on:
 
 ```{r}
 modestframes %>%
@@ -425,16 +431,9 @@ modestframes %>%
 
 Overall this seems like a reasonable, though imperfect, approximation to what appears to be going on in the data. 
 
-TODO:
-- check residuals
-- interpret effects within the model
-- explain the underlying model
-
-- comment on REML vs ML: REML fits the fixed effects first, then estimates the random effects; whereas ML does them jointly. General advice is that you have to test fixed effects using the ML fits; to test random effects you can do it either way, but REML is generally preferred (for reasons).
-
 ## Example 2: More complicated designs
 
-At long last, we are at the point where we might be able to construct a sensible model for the *actual* `frames` data. To guide us in this process, let's plot the raw data for 20 randomly chosen subjects. This is pretty important, because each person is providing 21 responses that we expect to be related to one another in a systematic way, but we might not be completely sure what structure we'll find. 
+We're about ready to start working with the *actual* `frames` data. To guide us in this process, let's plot the raw data for 20 randomly chosen subjects. This is pretty important, because each person is providing 21 responses that we expect to be related to one another in a systematic way, but we might not be completely sure what structure we'll find. 
 
 ```{r}
 whichids <- sample(unique(frames$id), 20) 
@@ -603,7 +602,6 @@ To my mind, the only part of this output that matters is this one line, highligh
 
 If you want to get more out of the data than this, statistics won't help you any more. You're going to have to try doing some psychology, I'm afraid...
 
-
 ## THE BIGGEST LESSON
 
 If I were exploring the data without the guide of substantive theory and with no proper cognitive model to tell me where to look next, I would be *very* wary of going any further. Blindly trying to make sense of three-way interaction effects  is a terrible idea, and you'll end up chasing shadows. Nothing -- and I repeat, **NOTHING** -- in what we have done so far, is "theory". Yes, what we have here is a "model" in the sense that statisticians refer to a model, but it is *not* a cognitive model in the sense that any psychologist would care about. It is not constrained by any notion of how people are solving the reasoning problem. There is no substance here: it is purely data analysis. One of the big traps that psychologists have fallen for, time and time again over the last century, is believing that statistical models can provide a substitute for theory. Call it the *psychometric fallacy* if you will. 
@@ -611,4 +609,3 @@ If I were exploring the data without the guide of substantive theory and with no
 ## So what goes in the paper?
 
 This tutorial has included  a number of different analyses, and you might be confused at this point about which (if any) of them should be included when writing up the experiment for publication. For some thoughts on this issue  see `chdss2019_content/samplingframes/analysis/analysis_samplesize.Rmd`
-
