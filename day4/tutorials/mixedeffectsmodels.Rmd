@@ -1,0 +1,179 @@
+---
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Mixed effects models</h1></div>'
+author: "Charles Kemp"
+date: "CHDSS 2019"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: flatly
+    highlight: textmate
+    css: mystyle.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, progress = TRUE)
+```
+
+```{r packageload, include=FALSE}
+library(tidyverse)
+library(lme4)
+library(here)
+set.seed(1)
+```
+
+This document gives an introduction to mixed effects models.  It's follows Chapter 9 of [R for Psych](https://glennwilliams.me/r4psych/) by Glenn Williams very closely, and the toy data set we'll use is from the same resource.
+
+```{r data}
+sleep_groups <-read_csv(here("data", "sleep_study_with_sim_groups.csv")) 
+
+if (0) { # shuffle subjects between groups
+# make frame showing Group for each Subject
+SubjGroups <-  sleep_groups %>%  
+  group_by(Subject, Group) %>%  
+  summarize()
+
+nsubject <- max(sleep_groups$Subject)
+subjperm <- sample(nsubject)
+orig_groups <- SubjGroups$Group
+sleep_groups <- sleep_groups %>% 
+  mutate(Group= orig_groups[subjperm[Subject]])
+}
+
+  
+sleep_groups <- sleep_groups %>% 
+  mutate(Subject=factor(Subject))
+head(sleep_groups)
+```
+
+This data set is for an (imaginary) study that looks at the effect of days without sleep on reaction times. Suppose that there are three groups of people--- for example, `group_1` could be teenagers,  `group_2` twenty-year olds and `group_3` thirty-year olds.
+
+# Linear model 
+
+Let's first fit and plot a linear model:
+
+```{r linear}
+lm(Reaction ~ Days, data = sleep_groups)
+
+ggplot(data = sleep_groups, mapping = aes(x = Days, y = Reaction)) +
+  geom_point(na.rm = T, aes(col = Group), alpha = 0.5) +
+  geom_smooth(method = "lm", na.rm = T, col = "black", se = F) +
+  scale_y_continuous(limits = c(180, 1020)) +
+  scale_x_continuous(breaks = seq(1:10) - 1) +
+  theme(legend.position = "top")
+```
+
+You can see that the three groups look to have different intercepts and probably different slopes --- for example, the blue points (group 3) are higher  than the rest, and seem to rise more steeply. So let's try adding random effects to capture the statistical dependency between samples from the same group.
+
+# Random intercepts for each group
+
+```{r }
+me_intercepts <- lmer(Reaction ~ Days + (1 | Group), data = sleep_groups) 
+me_intercepts
+```
+
+```{r } 
+# see group coefficients
+model_coefs <- coef(me_intercepts)$Group %>% 
+  rename(Intercept = `(Intercept)`, Slope = Days) %>% 
+  rownames_to_column("Group")
+
+model_coefs
+```
+
+```{r}
+
+sleep_groups_rani <- left_join(sleep_groups, model_coefs, by = "Group")
+
+model_coef_plot <- ggplot(data = sleep_groups_rani, 
+       mapping = aes(x = Days, 
+                     y = Reaction, 
+                     colour = Group)
+       ) +
+  geom_point(na.rm = T, alpha = 0.5) +
+  geom_abline(aes(intercept = Intercept, 
+                  slope = Slope,
+                  colour = Group
+                  ),
+              size = 1.5
+              ) +
+  scale_y_continuous(limits = c(180, 1020)) +
+  scale_x_continuous(breaks = seq(1:10) - 1) +
+  theme(legend.position = "top")
+
+# see the plot
+model_coef_plot
+
+
+
+```
+
+Looks better but still not ideal. For example the line for the blue group should probably have a greater slope than the line for the red group.
+
+# Random slopes for each group
+
+```{r }
+me_slopes <- lmer(Reaction ~ Days + (0 + Days | Group), data = sleep_groups)
+
+# see group coefficients
+model_coefs <- coef(me_slopes)$Group %>% 
+  rename(Intercept = `(Intercept)`, Slope = Days) %>% 
+  rownames_to_column("Group")
+
+# see coefficients
+model_coefs
+
+sleep_groups_rans <- left_join(sleep_groups, model_coefs, by = "Group")
+
+model_coef_plot %+% sleep_groups_rans
+```
+
+Slopes look better but intercepts seem off -- the intercept for the blue group should be higher than for the other two groups.
+
+## Random intercepts and slopes 
+```{r }
+me_interceptslopes <- lmer(Reaction ~ Days + (1 + Days | Group), data = sleep_groups)
+
+# see group coefficients
+model_coefs <- coef(me_interceptslopes)$Group %>% 
+  rename(Intercept = `(Intercept)`, Slope = Days) %>% 
+  rownames_to_column("Group")
+
+# see coefficients
+model_coefs
+
+sleep_groups_ranis <- left_join(sleep_groups, model_coefs, by = "Group")
+
+model_coef_plot %+% sleep_groups_ranis
+```
+
+Now the regression lines for each group look better. 
+
+## Additional random effects?
+
+There's another dependency that we haven't yet acknowledged. All of the data points for a given individual will be coupled in a way that data points for different individuals are not. So we could perhaps add a random intercept for Subject.
+
+```{r }
+me_subjectintercept <- lmer(Reaction ~ Days + (1 + Days | Group) + (1|Subject), data = sleep_groups)
+```
+
+## Exercise 1: Add a random slope for Subject
+
+How about a random slope for Subject as well?
+
+```{r eval=FALSE}
+me_subjectinterceptslope <- lmer(YOUR_CODE_HERE) 
+```
+
+## Exercise 2: Model comparison
+
+Compare 5 models using an ANOVA: `me_intercepts`, `me_slopes`, `me_interceptslopes`, `me_subjectintercept`, `me_subjectinterceptslope`. Look at the BIC values in the output to see which model fits best. 
+
+```{r eval=FALSE}
+ONE_LINE_HERE
+```
+
+## Exercise 3: Model comparison
+
+There's a chunk at the top of this notebook called `data` that includes an `if (0)` statement. Set this to `if (1)` to shuffle Subjects between groups, and Knit the notebook again. Take a look at the plots in the notebook -- how have they changed? Which of the 5 models is preferred now?
+
