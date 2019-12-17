@@ -1,0 +1,55 @@
+---
+title: "ggplot Exercise 2"
+author: "Amy Perfors (adapted from Danielle Navarro)"
+date: "18/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We're going to continue our analysis is of th "Sydney beaches dataset, which contains info about the weather on a variety of Sydney beaches at different times.
+
+```{r, dataload, error=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+data_file <- here("data", "sydneybeaches3.csv")
+beaches <- read_csv(file = data_file)
+```
+
+Create a line plot that puts the date on the x-axis and the temperature on the y-axis.
+
+```{r scatterplot, error=FALSE, warning=FALSE}
+
+```
+
+Change this plot so that the colour aesthetic is *also* mapped onto the temperature variable (i.e., add another line to the mapping). What happens?
+
+```{r colourplot, error=FALSE, warning=FALSE}
+
+```
+
+Now try changing which variable is mapped onto the colour aesthetic. Try mapping it to "season_name" and then to "season". Do they give the same results? Why or why not?
+
+```{r seasonplot, error=FALSE, warning=FALSE}
+
+```
+
+Now suppose I want to use season_name for the colour aesthetic, but want every distinct month (e.g. Jan 2013, Feb 2013, etc) to be a "group" that is drawn as its own line. How do I do this?
+
+```{r monthadd, error=FALSE, warning=FALSE}
+
+```
+
+Look at the legend for the colour aesthetic. It organises the seasons alphabetically. It would make more sense to order them chronologically, starting with the first season of the year (i.e., summer). Use the "reorder" function to order the "season_name" categories using the "season_num" variable. You do not need to alter the data set, you can do this when mapping the "colour" aesthetic.
+
+```{r reorder, error=FALSE, warning=FALSE}
+
+```
+
+Finally, use Rcolorbrewer to choose a better palette for this plot.
+
+```{r colouring, error=FALSE, warning=FALSE}
+
+```

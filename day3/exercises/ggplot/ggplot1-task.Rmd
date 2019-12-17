@@ -1,0 +1,47 @@
+---
+title: "ggplot Exercise 1"
+author: "Amy Perfors (adapted from Danielle Navarro)"
+date: "18/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For this DIY exercise, we have an R Markdown document with missing code. Our analysis is of th "Sydney beaches dataset, which contains info about the weather on a variety of Sydney beaches at different times.
+
+```{r, dataload, error=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+data_file <- here("data", "sydneybeaches3.csv")
+beaches <- read_csv(file = data_file)
+```
+
+The plot below is a scatterplot showning temperature on the x-axis and rainfall on the y-axis. First, run this section of code and see what happens:
+
+```{r scatterplot, error=FALSE, warning=FALSE}
+ggplot(
+  beaches, 
+  aes(x=temperature, 
+      y=rainfall)) + 
+geom_point()
+```
+
+Now construct a new plot that makes the points larger and colours them according to season. (Question: why does it do something different for the season and season_name variables?)
+
+```{r tempplot, error=FALSE, warning=FALSE}
+
+```
+
+Next we need to add a title. Create a new plot that uses the labs() function to add an informative title to the plot
+
+```{r titleadd, error=FALSE, warning=FALSE}
+
+```
+
+Finally, add the bw theme and facet by season as well.
+
+```{r facetadd, error=FALSE, warning=FALSE}
+
+```

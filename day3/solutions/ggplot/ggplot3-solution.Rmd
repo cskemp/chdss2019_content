@@ -1,0 +1,100 @@
+---
+title: "ggplot Exercise 3"
+author: "Amy Perfors (adapted from Danielle Navarro)"
+date: "18/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We're going to continue our analysis is of th "Sydney beaches dataset, which contains info about the weather on a variety of Sydney beaches at different times.
+
+```{r, dataload, error=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(here)
+data_file <- here("data", "sydneybeaches3.csv")
+beaches <- read_csv(file = data_file)
+```
+
+The plot below plots the amount of bacteria found on the beaches by date.
+
+```{r scatterplot, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(
+    x = date,
+    y = log10(enterococci)
+  ) 
+) + 
+geom_point(size=2) +
+theme_bw()
+```
+
+Add a blue line to this plot. Make sure the line goes *under* the points.
+
+```{r lineplot, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(
+    x = date,
+    y = log10(enterococci)
+  ) 
+) + 
+geom_line(colour="lightblue") +
+geom_point(size=2) +
+theme_bw()
+```
+
+Make a boxplot of the bacteria (on the y axis) by the name of the season (on the x axis). For extra credit, make sure the seasons are in chronological order.
+
+```{r boxplot, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(
+    x = reorder(season_name,season),
+    y = log10(enterococci))
+  ) + 
+geom_boxplot() +
+theme_bw()
+```
+
+Add jittered points to your boxplot, and colour them according to the name of the season. Make them slightly see-through for extra credit.
+
+```{r jitteredplot, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(
+    x = reorder(season_name,season),
+    y = log10(enterococci))
+  ) + 
+geom_boxplot() +
+geom_jitter(alpha=0.5) +
+theme_bw()
+```
+
+Make a plot with four facets, one for each season, that shows a histogram of the temperature in each season.. 
+
+```{r hists, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(x = temperature)) + 
+facet_wrap(vars(reorder(season_name,season))) + 
+labs(title = "Sydney temperatures",x = "Temperature", y = "") + 
+geom_histogram() +
+theme_bw() 
+```
+
+Change those histograms to density plots (hint: look up the geom called geom_density). For extra credit, colour them by season_name. (Hint: use the fill parameter)
+
+```{r densities, error=FALSE, warning=FALSE}
+ggplot(
+  data = beaches,
+  mapping = aes(x = temperature, fill=season_name),
+) + 
+facet_wrap(vars(reorder(season_name,season))) + 
+labs(title = "Sydney temperatures",x = "Temperature", y = "") + 
+geom_density() +
+theme_bw() 
+```

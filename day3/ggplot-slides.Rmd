@@ -1,0 +1,1948 @@
+---
+title: "Prettiness with ggplot2"
+subtitle: "Amy Perfors"
+author: "<br><br>adapted from Danielle Navarro: https://djnavarro.github.io/chdss2018/day2/ggplot-slides.html<BR>https://djnavarro.github.io/satrdayjoburg/"
+date: "18 December 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    chakra: libs/remark-latest.min.js    
+    #css: ["kunoichi", "ninjutsu" , "assets/ninpo.css", "assets/danielle.css"]
+    css: ["rutgers", "rutgers-fonts" , "ninjutsu", "assets/ninpo.css", "assets/danielle.css"]
+    self_contained: false
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE, message = FALSE, warning=FALSE}
+options(htmltools.dir.version = FALSE)
+library(tidyverse)
+library(here)
+library(hexbin)
+library(gganimate)
+library(sf)
+library(usethis)
+library(scico)
+library(scales)
+```
+
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Data visualisation
+
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+<img src="images/horst_ggplot.png", width="70%">
+
+[@allison_horst](https://twitter.com/allison_horst)
+
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[A plot of the<BR>frames data]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 middle center
+
+.pull.left[.pad1[.font2[
+```{r framesdata, eval=TRUE, message=FALSE}
+# load data
+frames <- read_csv(here("data","frames_ex2.csv"))
+
+# show data
+frames
+```
+]]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+# Summarise frames data
+
+.pull.left[.pad1[.font2[
+```{r, eval=FALSE, message = FALSE}
+frames_small <- frames %>%
+  group_by(
+    age, condition, sample_size
+  ) %>%
+  summarise(
+    response = mean(response)
+  ) %>%
+  ungroup()
+
+frames_small
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+frames_small <- frames %>%
+  group_by(
+    age, condition, sample_size
+  ) %>%
+  summarise(
+    response = mean(response)
+  ) %>%
+  ungroup()
+
+frames_small
+```
+]]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-40 bg-main1
+
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+
+A simple plot
+
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  frames_small, 
+  aes(age, response)
+) + 
+geom_point()
+```
+
+- A little verbose?
+- Not the prettiest plot?
+- Why is it like this?
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r introplot, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(frames_small, aes(age, response)) + geom_point()
+```
+
+]]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Painting a Picture]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font7[
+
+.center[
+# ggplot2 is...
+]
+<br>
+
+## A grammar...
+
+- grammars compose & reuse small parts
+- complex structures from simpler units
+
+## ...of graphics
+
+- uses the "painters model"
+- a plot is built in layers
+- each layer is drawn on top of the last
+
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+<img src="images/trinity-treft-696428-unsplash.jpg", width="70%">
+
+[Image credit: Trinity Treft](https://unsplash.com/photos/waYWz3vAYJQ)
+
+]]
+
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+
+A blank canvas
+
+```{r, eval=FALSE, message = FALSE}
+ggplot()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r blankcanvas, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE}
+ggplot() 
+```
+
+]]
+]]
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+Specify the .orange[data]
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small #<<
+)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r stillblankcanvas, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE}
+ggplot(
+  data = frames_small #<<
+) 
+```
+
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+A .orange[mapping] from data onto plot .orange[aesthetics]
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(      #<<
+    x = age, #<<
+    y = response       #<<
+  )                   #<<
+)
+```
+
+
+- .orange[x]-axis location
+- .orange[y]-axis location
+- .orange[colour] of marker
+- .orange[fill] of a marker
+- .orange[shape] of a marker, etc.
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r aesthetics, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+)
+```
+
+]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add a plot .orange[layer]
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+geom_point() #<<
+```
+
+- the .orange[points]
+- the .orange[lines]
+- the .orange[histograms]
+- etc
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_layer, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+geom_point() #<<
+```
+
+]]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add layer-specific parameters
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+geom_point(size = 3) #<<
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_fixedaesthetic, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+geom_point(size = 3) #<<
+```
+
+]]
+]]
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add layer-specific mappings
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) #<<
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_layeraesthetic, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) #<<
+```
+
+]]
+]]
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add more layers to the plotcake
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() #<<
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r two_layers, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug()
+```
+
+]]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Split into .orange[facets]
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) #<<
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_facets, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) #<<
+```
+
+]]
+]]
+
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Modify the .orange[theme]
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() #<<
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_theme, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() 
+```
+
+]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+(Nothing to see here...)
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition)) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_theme2, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition)) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw()
+```
+
+]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Make nicer titles
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+labs( #<<
+  title = "Response by age", #<<
+  subtitle = "Varying condition and sample size", #<<
+  x = "Age (years)", #<<
+  y = "Response (1=no, 9=yes)" #<<
+) #<<
+
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r add_titles, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+labs( #<<
+  title = "Response by age", #<<
+  subtitle = "Varying condition and sample size", #<<
+  x = "Age (years)", #<<
+  y = "Response (1=no, 9=yes)" #<<
+) #<<
+```
+
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+Done! Our plotcake is baked.
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+labs(
+  title = "Response by age",
+  subtitle = "Varying condition and sample size",
+  x = "Age (years)",
+  y = "Response (1=no, 9=yes)"
+)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r done, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+labs(
+  title = "Response by age",
+  subtitle = "Varying condition and sample size",
+  x = "Age (years)",
+  y = "Response (1=no, 9=yes)"
+)
+```
+
+]]
+]]
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+All the ingredients are needed!
+
+- Data
+- Aesthetics
+- Layers
+- Facets
+- Theme
+- (Coordinates)
+- (Scales)
+
+]]]
+]]
+
+--
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+So when I type this...
+```{r condensed, eval=FALSE}
+ggplot(
+  frames_small, 
+  aes(age, response)
+) + 
+geom_point()
+```
+
+]]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+All the ingredients are needed!
+
+- Data
+- Aesthetics
+- Layers
+- Facets
+- Theme
+- (Coordinates)
+- (Scales)
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+What I get is this...
+```{r expanded, eval=FALSE}
+ggplot(
+  data = frames_small, 
+  mapping = aes(
+    x = age, y = response)) + 
+layer(
+  geom = "point",
+  stat = "identity",
+  position = "identity") + 
+facet_null() +
+theme_grey() + 
+coord_cartesian() + 
+scale_x_continuous() + 
+scale_y_continuous()
+```
+
+]]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 01<br>
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Aesthetics]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+# New summary of data
+
+.pull.left[.pad1[.font2[
+```{r, eval=FALSE, message = FALSE}
+frames_test <- frames %>%
+  group_by(
+    test_item, condition, sample_size
+  ) %>%
+  summarise(
+    response = mean(response)
+  ) %>%
+  ungroup()
+
+frames_test
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+frames_test <- frames %>%
+  group_by(
+    test_item, condition, sample_size
+  ) %>%
+  summarise(
+    response = mean(response)
+  ) %>%
+  ungroup()
+
+frames_test
+```
+]]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Locations (.orange[x] and .orange[y]) are aesthetics
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item, #<<
+    y = response #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item, #<<
+    y = response #<<
+  ) 
+) + 
+geom_line()  +
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[colour] can be an aesthetic
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = condition #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = condition #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[group] can matter!
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = condition,
+    group = sample_size #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = condition,
+    group = sample_size #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+But maybe we want to colour by sample size
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size #<<
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[fill] can be an aesthetic
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+    fill = sample_size #<<
+  ) 
+) + 
+geom_histogram() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+    fill = sample_size #<<
+  ) 
+) + 
+geom_histogram() +
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+These are terrible colours. Use palettes instead!
+
+```{r, eval=FALSE, message = FALSE}
+# install.packages("RColorBrewer")
+library(RColorBrewer)
+display.brewer.all()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+# install.packages("RColorBrewer")
+library(RColorBrewer)
+display.brewer.all()
+```
+
+]]
+]]
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Can do fills...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+    fill = sample_size
+  ) 
+) + 
+geom_histogram() +
+scale_fill_brewer(palette = "Dark2") + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+    fill = sample_size #<<
+  ) 
+) + 
+geom_histogram() +
+scale_fill_brewer(palette = "Dark2") + #<<
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+And colours...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() +
+scale_color_brewer(palette = "Set1") + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() +
+scale_color_brewer(palette = "Set1") + #<<
+facet_wrap(vars(condition))
+```
+
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 02<br>
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Geoms]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Points and lines are "simple" geoms
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Points and lines are "simple" geoms
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_point() + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size #<<
+  ) 
+) + 
+geom_point() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms can be layered and take parameters
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_point(size=4) + #<<
+geom_line() + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_point(size=4) + #<<
+geom_line() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The order of geoms matters
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() + #<<
+geom_point(size=4) + #<<
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() + #<<
+geom_point(size=4) + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_boxplot() + #<<
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_boxplot() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() + #<<
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() +
+geom_jitter() + #<<
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() + 
+geom_jitter() + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() +
+geom_jitter(alpha=0.5,size=3) + #<<
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() + 
+geom_jitter(alpha=0.5,size=3) + #<<
+facet_wrap(vars(condition))
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count() #<<
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count() #<<
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count() + 
+facet_grid(condition ~ sample_size) #<<
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count() + 
+facet_grid(condition ~ sample_size) #<<
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count(aes(colour = ..n..)) + #<<
+facet_grid(condition ~ sample_size)
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count(aes(colour = ..n..)) + #<<
+facet_grid(condition ~ sample_size) 
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+```{r, eval=FALSE, message = FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_point(size=4) +
+geom_smooth() + #<<
+facet_wrap(sample_size ~ condition)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE, cache=TRUE, warning=FALSE}
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_point(size=4) +
+geom_smooth() + #<<
+facet_wrap(sample_size ~ condition)
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Error bars,<BR>contours]
+]]
+
+
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Summarise with errors
+```{r, eval=FALSE, message = FALSE}
+library(lsr)
+
+frames_mean <- frames %>%
+  group_by(
+    condition, sample_size, test_item
+  ) %>%
+  summarise(
+    resp = mean(response),
+    lower = ciMean(response)[1],
+    upper = ciMean(response)[2]
+  )
+
+frames_mean
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+library(lsr)
+
+frames_mean <- frames %>%
+  group_by(condition,sample_size,test_item) %>%
+  summarise(
+    resp = mean(response),
+    lower = ciMean(response)[1],
+    upper = ciMean(response)[2]
+  )
+
+frames_mean
+```
+]]
+]]
+
+
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Plot the error bars
+```{r, eval=FALSE, message = FALSE}
+frames_mean %>%
+  ggplot(aes(
+    x = test_item, y = resp, colour = condition
+  )) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(
+    ymin = lower, ymax = upper
+  )) +
+  facet_wrap(~sample_size)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+frames_mean %>%
+  ggplot(aes(
+    x = test_item, y = resp, colour = condition
+  )) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(
+    ymin = lower, ymax = upper
+  )) +
+  facet_wrap(~sample_size)
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Let's also make contours
+```{r, eval=FALSE, message = FALSE}
+frames_test %>% 
+  ggplot(mapping = aes(
+    x = test_item, 
+    y = response, 
+    colour = condition)) +
+  geom_point() + 
+  theme_bw() +
+  geom_density_2d() +
+  facet_wrap(~condition) +
+  ylim(0,9)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+```{r, eval=TRUE, message = FALSE, echo=FALSE}
+frames_test %>% 
+  ggplot(mapping = aes(
+    x = test_item, 
+    y = response, 
+    colour = condition)) +
+  geom_point() + 
+  theme_bw() +
+  geom_density_2d() +
+  facet_wrap(~condition) +
+  ylim(0,9)
+```
+]]
+]]
+
+
+<!-- *********** NEW SLIDE ************** -->
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 04: Play!<br>
+]]
+

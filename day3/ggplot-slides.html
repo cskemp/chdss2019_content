@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Prettiness with ggplot2</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="  adapted from Danielle Navarro: https://djnavarro.github.io/chdss2018/day2/ggplot-slides.htmlhttps://djnavarro.github.io/satrdayjoburg/" />
+    <meta name="date" content="2019-12-18" />
+    <link href="libs/remark-css/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css/rutgers-fonts.css" rel="stylesheet" />
+    <link href="libs/remark-css/ninjutsu.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/ninpo.css" type="text/css" />
+    <link rel="stylesheet" href="assets/danielle.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Prettiness with ggplot2
+## Amy Perfors
+### <br><br>adapted from Danielle Navarro: <a href="https://djnavarro.github.io/chdss2018/day2/ggplot-slides.html" class="uri">https://djnavarro.github.io/chdss2018/day2/ggplot-slides.html</a><BR><a href="https://djnavarro.github.io/satrdayjoburg/" class="uri">https://djnavarro.github.io/satrdayjoburg/</a>
+### 18 December 2019
+
+---
+
+
+
+
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Data visualisation
+
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/horst_ggplot.png", width="70%"&gt;
+
+[@allison_horst](https://twitter.com/allison_horst)
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[A plot of the&lt;BR&gt;frames data]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 middle center
+
+.pull.left[.pad1[.font2[
+
+```r
+# load data
+frames &lt;- read_csv(here("data","frames_ex2.csv"))
+
+# show data
+frames
+```
+
+```
+## # A tibble: 4,725 x 8
+##       id gender   age condition sample_size n_obs test_item response
+##    &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1     1 male      36 category  small           2         1        8
+##  2     1 male      36 category  small           2         2        7
+##  3     1 male      36 category  small           2         3        6
+##  4     1 male      36 category  small           2         4        6
+##  5     1 male      36 category  small           2         5        5
+##  6     1 male      36 category  small           2         6        6
+##  7     1 male      36 category  small           2         7        3
+##  8     1 male      36 category  medium          6         1        9
+##  9     1 male      36 category  medium          6         2        7
+## 10     1 male      36 category  medium          6         3        5
+## # … with 4,715 more rows
+```
+]]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+# Summarise frames data
+
+.pull.left[.pad1[.font2[
+
+```r
+frames_small &lt;- frames %&gt;%
+  group_by(
+    age, condition, sample_size
+  ) %&gt;%
+  summarise(
+    response = mean(response)
+  ) %&gt;%
+  ungroup()
+
+frames_small
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```
+## # A tibble: 231 x 4
+##      age condition sample_size response
+##    &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;
+##  1    20 category  large           3.86
+##  2    20 category  medium          4.21
+##  3    20 category  small           4.93
+##  4    20 property  large           4.37
+##  5    20 property  medium          4.31
+##  6    20 property  small           3.74
+##  7    21 category  large           5.5 
+##  8    21 category  medium          5.04
+##  9    21 category  small           5.46
+## 10    21 property  large           3.71
+## # … with 221 more rows
+```
+]]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+
+A simple plot
+
+
+```r
+ggplot(
+  frames_small, 
+  aes(age, response)
+) + 
+geom_point()
+```
+
+- A little verbose?
+- Not the prettiest plot?
+- Why is it like this?
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/introplot-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Painting a Picture]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font7[
+
+.center[
+# ggplot2 is...
+]
+&lt;br&gt;
+
+## A grammar...
+
+- grammars compose &amp; reuse small parts
+- complex structures from simpler units
+
+## ...of graphics
+
+- uses the "painters model"
+- a plot is built in layers
+- each layer is drawn on top of the last
+
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/trinity-treft-696428-unsplash.jpg", width="70%"&gt;
+
+[Image credit: Trinity Treft](https://unsplash.com/photos/waYWz3vAYJQ)
+
+]]
+
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+
+A blank canvas
+
+
+```r
+ggplot()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/blankcanvas-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+Specify the .orange[data]
+
+```r
+ggplot(
+* data = frames_small
+)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/stillblankcanvas-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+A .orange[mapping] from data onto plot .orange[aesthetics]
+
+```r
+ggplot(
+  data = frames_small,
+* mapping = aes(
+*   x = age,
+*   y = response
+* )
+)
+```
+
+
+- .orange[x]-axis location
+- .orange[y]-axis location
+- .orange[colour] of marker
+- .orange[fill] of a marker
+- .orange[shape] of a marker, etc.
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/aesthetics-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add a plot .orange[layer]
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+*geom_point()
+```
+
+- the .orange[points]
+- the .orange[lines]
+- the .orange[histograms]
+- etc
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_layer-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add layer-specific parameters
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response
+  ) 
+) + 
+*geom_point(size = 3)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_fixedaesthetic-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add layer-specific mappings
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+*geom_point(size = 3)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_layeraesthetic-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Add more layers to the plotcake
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+*geom_rug()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/two_layers-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Split into .orange[facets]
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+*facet_wrap(vars(sample_size))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_facets-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Modify the .orange[theme]
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+*theme_bw()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_theme-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+(Nothing to see here...)
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition)) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_theme2-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Make nicer titles
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+*labs(
+* title = "Response by age",
+* subtitle = "Varying condition and sample size",
+* x = "Age (years)",
+* y = "Response (1=no, 9=yes)"
+*) 
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/add_titles-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+Done! Our plotcake is baked.
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = age, 
+    y = response,
+    colour = condition
+  ) 
+) + 
+geom_point(size = 3) +
+geom_rug() + 
+facet_wrap(vars(sample_size)) +
+theme_bw() +
+labs(
+  title = "Response by age",
+  subtitle = "Varying condition and sample size",
+  x = "Age (years)",
+  y = "Response (1=no, 9=yes)"
+)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/done-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+All the ingredients are needed!
+
+- Data
+- Aesthetics
+- Layers
+- Facets
+- Theme
+- (Coordinates)
+- (Scales)
+
+]]]
+]]
+
+--
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+So when I type this...
+
+```r
+ggplot(
+  frames_small, 
+  aes(age, response)
+) + 
+geom_point()
+```
+
+]]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+.pull.left[.pad1[.font2[
+All the ingredients are needed!
+
+- Data
+- Aesthetics
+- Layers
+- Facets
+- Theme
+- (Coordinates)
+- (Scales)
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+What I get is this...
+
+```r
+ggplot(
+  data = frames_small, 
+  mapping = aes(
+    x = age, y = response)) + 
+layer(
+  geom = "point",
+  stat = "identity",
+  position = "identity") + 
+facet_null() +
+theme_grey() + 
+coord_cartesian() + 
+scale_x_continuous() + 
+scale_y_continuous()
+```
+
+]]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 01&lt;br&gt;
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Aesthetics]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+# New summary of data
+
+.pull.left[.pad1[.font2[
+
+```r
+frames_test &lt;- frames %&gt;%
+  group_by(
+    test_item, condition, sample_size
+  ) %&gt;%
+  summarise(
+    response = mean(response)
+  ) %&gt;%
+  ungroup()
+
+frames_test
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```
+## # A tibble: 42 x 4
+##    test_item condition sample_size response
+##        &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;          &lt;dbl&gt;
+##  1         1 category  large           7.60
+##  2         1 category  medium          7.32
+##  3         1 category  small           6.07
+##  4         1 property  large           7.16
+##  5         1 property  medium          6.66
+##  6         1 property  small           5.78
+##  7         2 category  large           7.51
+##  8         2 category  medium          7.17
+##  9         2 category  small           6.26
+## 10         2 property  large           7.20
+## # … with 32 more rows
+```
+]]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Locations (.orange[x] and .orange[y]) are aesthetics
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+*   x = test_item,
+*   y = response
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[colour] can be an aesthetic
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+*   colour = condition
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[group] can matter!
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = condition,
+*   group = sample_size
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+But maybe we want to colour by sample size
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+*   group = sample_size
+  ) 
+) + 
+geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The .orange[fill] can be an aesthetic
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+*   fill = sample_size
+  ) 
+) + 
+geom_histogram() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+These are terrible colours. Use palettes instead!
+
+
+```r
+# install.packages("RColorBrewer")
+library(RColorBrewer)
+display.brewer.all()
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-29-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Can do fills...
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = response,
+    fill = sample_size
+  ) 
+) + 
+geom_histogram() +
+*scale_fill_brewer(palette = "Dark2") +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+And colours...
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+geom_line() +
+*scale_color_brewer(palette = "Set1") +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 02&lt;br&gt;
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Geoms]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Points and lines are "simple" geoms
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+*geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Points and lines are "simple" geoms
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+*geom_point() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms can be layered and take parameters
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+*geom_point(size=4) +
+*geom_line() +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+The order of geoms matters
+
+```r
+ggplot(
+  data = frames_test,
+  mapping = aes(
+    x = test_item,
+    y = response,
+    colour = sample_size,
+    group = sample_size 
+  ) 
+) + 
+*geom_line() +
+*geom_point(size=4) +
+facet_wrap(vars(condition))
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+*geom_boxplot() +
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-43-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+*geom_violin() +
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-45-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() +
+*geom_jitter() +
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-47-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames_small,
+  mapping = aes(
+    x = sample_size,
+    y = response
+  ) 
+) + 
+geom_violin() +
+*geom_jitter(alpha=0.5,size=3) +
+facet_wrap(vars(condition))
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-49-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+*geom_count()
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-51-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_count() + 
+*facet_grid(condition ~ sample_size)
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-53-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+*geom_count(aes(colour = ..n..)) +
+facet_grid(condition ~ sample_size)
+```
+
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-55-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Geoms come in many varieties...
+
+```r
+ggplot(
+  data = frames,
+  mapping = aes(
+    x = test_item,
+    y = response
+  ) 
+) + 
+geom_point(size=4) +
+*geom_smooth() +
+facet_wrap(sample_size ~ condition)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-57-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Error bars,&lt;BR&gt;contours]
+]]
+
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Summarise with errors
+
+```r
+library(lsr)
+
+frames_mean &lt;- frames %&gt;%
+  group_by(
+    condition, sample_size, test_item
+  ) %&gt;%
+  summarise(
+    resp = mean(response),
+    lower = ciMean(response)[1],
+    upper = ciMean(response)[2]
+  )
+
+frames_mean
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+
+```
+## # A tibble: 42 x 6
+## # Groups:   condition, sample_size [6]
+##    condition sample_size test_item  resp lower upper
+##    &lt;chr&gt;     &lt;chr&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 category  large               1  7.60  7.16  8.04
+##  2 category  large               2  7.51  7.14  7.88
+##  3 category  large               3  6.39  5.95  6.84
+##  4 category  large               4  5.39  4.86  5.93
+##  5 category  large               5  4.72  4.13  5.30
+##  6 category  large               6  4.43  3.79  5.07
+##  7 category  large               7  4.18  3.53  4.82
+##  8 category  medium              1  7.32  6.85  7.78
+##  9 category  medium              2  7.17  6.80  7.54
+## 10 category  medium              3  5.98  5.54  6.42
+## # … with 32 more rows
+```
+]]
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Plot the error bars
+
+```r
+frames_mean %&gt;%
+  ggplot(aes(
+    x = test_item, y = resp, colour = condition
+  )) +
+  geom_point() +
+  geom_line() +
+  geom_errorbar(aes(
+    ymin = lower, ymax = upper
+  )) +
+  facet_wrap(~sample_size)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-61-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-50 bg-main1
+
+.column.bg-main1[.content.vtop.center[
+
+.pull.left[.pad1[.font2[
+Let's also make contours
+
+```r
+frames_test %&gt;% 
+  ggplot(mapping = aes(
+    x = test_item, 
+    y = response, 
+    colour = condition)) +
+  geom_point() + 
+  theme_bw() +
+  geom_density_2d() +
+  facet_wrap(~condition) +
+  ylim(0,9)
+```
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pad1[.font2[
+![](ggplot-slides_files/figure-html/unnamed-chunk-63-1.png)&lt;!-- --&gt;
+]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: white bg-black center middle hide-slide-number
+
+.pad1[
+.font4[
+Exercise 04: Play!&lt;br&gt;
+]]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="libs/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Data wrangling with dplyr</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="  pretty much taken from Danielle Navarro: https://djnavarro.github.io/chdss2018/day2/wrangling-slides.html" />
+    <meta name="date" content="2019-12-18" />
+    <link href="libs/remark-css/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css/rutgers-fonts.css" rel="stylesheet" />
+    <link href="libs/remark-css/ninjutsu.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/ninpo.css" type="text/css" />
+    <link rel="stylesheet" href="assets/danielle.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data wrangling with dplyr
+## Amy Perfors
+### <br><br>pretty much taken from Danielle Navarro: <a href="https://djnavarro.github.io/chdss2018/day2/wrangling-slides.html" class="uri">https://djnavarro.github.io/chdss2018/day2/wrangling-slides.html</a>
+### 18 December 2019
+
+---
+
+
+
+
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Data wrangling]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Data wrangling
+
+&lt;br&gt;
+
+.pull.left[.pad1[
+
+### .orange[**What?**] 
+### .orange[**Why?**] 
+### .orange[**How?**] 
+
+]]
+
+]]
+
+--
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/horst_dplyr.png", width="70%"&gt;
+
+[@allison_horst](https://twitter.com/allison_horst)
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Structure of this section
+
+&lt;br&gt;
+
+.pull.left[.pad1[
+
+### This is interactive: don't just listen, code!
+### Goal is to deal with real data
+
+]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/horst_dplyr.png", width="70%"&gt;
+
+[@allison_horst](https://twitter.com/allison_horst)
+
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font5[The "sampling&lt;BR&gt; frames"&lt;BR&gt; experiment]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Property sampling: the robot only detects plaxium spheres
+&lt;br&gt;
+&lt;img src="images/data10_property.jpg", width="70%"&gt;
+&lt;br&gt;
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Category sampling: the robot only tests small spheres
+&lt;br&gt;
+&lt;img src="images/data10_category.jpg", width="70%"&gt;
+&lt;br&gt;
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Small sample size: Elicit judgments after two observations
+&lt;br&gt;
+&lt;img src="images/data2_property.jpg", width="70%"&gt;
+&lt;br&gt;
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Medium sample size: Elicit judgments after six observations
+&lt;br&gt;
+&lt;img src="images/data6_property.jpg", width="70%"&gt;
+&lt;br&gt;
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Large sample size: Elicit judgments after twelve observations
+&lt;br&gt;
+&lt;img src="images/data12_property.jpg", width="70%"&gt;
+&lt;br&gt;
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Seven test items that vary in size: Smallest...
+&lt;br&gt;
+&lt;img src="images/test2.jpg", width="70%"&gt;
+&lt;br&gt;
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle
+
+# Seven test items that vary in size: Largest...
+&lt;br&gt;
+&lt;img src="images/test8.jpg", width="70%"&gt;
+&lt;br&gt;
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-60 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# First let's pull all of the content for today
+
+&lt;br&gt;
+
+.pull.left[.pad1[
+
+### Go to your chdss2019_content folder and type "git status"
+### If you're not up to date, type "git pull"
+&lt;br&gt;
+
+### .white[Then copy the day3 folder to your CHDSS directory:]
+### .white[Change directory to CHDSS/day3/]
+### .white[You should see a file called data/frames_ex2.csv]
+
+]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-60 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# First let's pull all of the content for today
+
+&lt;br&gt;
+
+.pull.left[.pad1[
+
+### Go to your chdss2019_content folder and type "git status"
+### If you're not up to date, type "git pull"
+&lt;br&gt;
+
+### Then copy the day3 folder to your CHDSS directory:
+### Change directory to CHDSS/day3/
+### You should see a file called data/frames_ex2.csv
+
+]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Getting started]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# If you don't have the packages...
+
+
+.pull.left[.pad1[
+
+
+```r
+install.packages("tidyverse")
+install.packages("skimr")
+```
+
+
+]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# New R Markdown
+
+.pull.left[.pad1[.font2[
+- Create and call it initial.Rmd
+- At the top is the YAML header
+- This is the whole document...
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+.pull.left[.pad1[.font2[
+
+````
+---
+title: "Exploring the data"
+author: Amy Perfors
+date: 18 December 2019
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+````
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Write...
+
+.pull.left[.pad1[.font2[
+- Load packages in the first chunk
+- Write descriptions for humans!
+- Document, document, document
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+.pull.left[.pad1[.font2[
+
+````
+## Getting started
+
+The first thing to do in our analysis is load the R
+packages that we'll use to do the work:
+
+```{r}
+library(here)
+library(tidyverse)
+library(skimr)
+```
+
+The next step is to load the data set itself. The data 
+from the sampling frames experiment are stored in the 
+"frames_ex2.csv" file:
+
+```{r}
+loc &lt;- here("data","frames_ex2.csv")
+frames &lt;- read_csv(file = loc)
+```
+````
+
+]]]
+]]
+
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# ... and knit!
+
+.pull.left[.pad1[.font2[
+- Note the output messages
+- Helpful the first time...
+- ... but eventually annoying
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/explore1.png" width = "90%"&gt;
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Tidy the code chunk
+
+.pull.left[.pad1[.font2[
+- Give it a name (like packageload)
+- Suppress messages if you want
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+
+.pull.left[.pad1[.font2[
+````
+## Getting started
+
+The first thing to do in our analysis is load the R
+packages that we'll use to do the work:
+
+```{r packageload, message=FALSE}
+library(here)
+library(tidyverse)
+library(skimr)
+```
+````
+]]]
+
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Tidy the code chunk
+
+.pull.left[.pad1[.font2[
+- Give it a name (like packageload)
+- Suppress messages if you want
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/explore2.png" width = "90%"&gt;
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Import the data
+
+.pull.left[.pad1[.font2[
+- Verbal description
+- Specify the file location
+- Import data with read_csv()
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+.pull.left[.pad1[.font2[
+
+````
+The next step is to load the data set itself. The data 
+from the sampling frames experiment are stored in the 
+"frames_ex2.csv" file:
+
+```{r dataimport}
+loc &lt;- here("data","frames_ex2.csv")
+frames &lt;- read_csv(file = loc)
+```
+````
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Import the data
+
+.pull.left[.pad1[.font2[
+- Verbal description
+- Specify the file location
+- Import data with read_csv()
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+
+&lt;img src="images/explore3.png" width = "100%"&gt;
+
+]]
+
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Inspect the data set
+
+.pull.left[.pad1[.font2[
+- The data is a tibble
+- Printing it shows the structure
+- The glimpse() function is nice
+- Name each code chunk!
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+.pull.left[.pad1[.font2[
+
+````
+The data set has been imported as a tibble. Let's take 
+a quick look at the data. Each row in the data set is
+a single response, and each column is a variable:
+
+```{r printframes}
+frames
+```
+
+An alternative way to view the a tibble that sometimes
+looks nicer is to use the `glimpse()` function:
+
+```{r glimpseframes}
+glimpse(frames)
+```
+````
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Inspect the data set
+
+.pull.left[.pad1[.font2[
+- The data is a tibble
+- Printing it shows the structure
+- The glimpse() function is nice
+- Name each code chunk!
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/explore4.png" width = "90%"&gt;
+
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Skim over the data
+
+.pull.left[.pad1[.font2[
+- Gives means, std dev.
+- Gives quantiles
+- Even has little text histograms
+- (Not always useful though!)
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+````
+Finally, as a quick first pass, we can use the `skim()`
+function to get a simple overview of each variable:
+
+```{r skimframes}
+skim(frames)
+```
+````
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Skim over the data
+
+.pull.left[.pad1[.font2[
+- Gives means, std dev.
+- Gives quantiles
+- Even has little text histograms
+- (Not always useful though!)
+]]]
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/explore5.png" width = "90%"&gt;
+
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 1]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling1-task.Rmd]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Introducing the pipe]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-40 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# The pipe, %&gt;%
+
+.pull.left[.pad1[.font2[
+- Take the frames data...
+- Do one thing...
+- Then another...
+- And then one more...
+]]]
+]]
+--
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+```{}
+frames %&gt;%
+  do_one_thing(.) %&gt;%
+  then_another(.) %&gt;%
+  and_then_one_more(.)
+```
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# Regular code
+
+```{}
+do_one_thing(frames) 
+```
+
+]]]
+]]
+--
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# The piped version
+
+```{}
+frames %&gt;% do_one_thing() 
+```
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# Regular code
+
+```{}
+then_another(
+  do_one_thing(
+    frames
+  ) 
+)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# The piped version
+
+```{}
+frames %&gt;% 
+  do_one_thing() %&gt;%
+  then_another()
+```
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# Regular code
+
+```{}
+and_then_one_more(
+  then_another(
+    do_one_thing(
+      frames
+    ) 
+  )
+)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# The piped version
+
+```{}
+frames %&gt;% 
+  do_one_thing() %&gt;%
+  then_another() %&gt;%
+  and_then_one_more()
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# Regular code
+
+```{}
+then_this(
+  and_then_one_more(
+    then_another(
+      do_one_thing(
+        frames
+      ) 
+    )
+  )
+)
+```
+
+]]]
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+.pull.left[.pad1[.font2[
+
+# The piped version
+
+```{}
+frames %&gt;% 
+  do_one_thing() %&gt;%
+  then_another() %&gt;%
+  and_then_one_more() %&gt;%
+  then_this()
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 2]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling2-task.Rmd]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[group_by,&lt;BR&gt;summarise,&lt;BR&gt;ungroup]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# summarise()
+
+.pull.left[.pad1[.font2[
+- Group by variables
+- Create summary stats for them
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+frames %&gt;%
+  group_by(test_item, sample_size, n_obs, condition) %&gt;%
+  summarise(response = mean(response))
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# summarise()
+
+.pull.left[.pad1[.font2[
+- Group by variables
+- Create summary stats for them
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+frames %&gt;%
+  group_by(test_item, sample_size, n_obs, condition) %&gt;%
+  summarise(response = mean(response))
+```
+
+```
+## # A tibble: 42 x 5
+## # Groups:   test_item, sample_size, n_obs [21]
+##    test_item sample_size n_obs condition response
+##        &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1         1 large          12 category      7.60
+##  2         1 large          12 property      7.16
+##  3         1 medium          6 category      7.32
+##  4         1 medium          6 property      6.66
+##  5         1 small           2 category      6.07
+##  6         1 small           2 property      5.78
+##  7         2 large          12 category      7.51
+##  8         2 large          12 property      7.20
+##  9         2 medium          6 category      7.17
+## 10         2 medium          6 property      6.95
+## # … with 32 more rows
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# ungroup!
+
+.pull.left[.pad1[.font2[
+- Get in the habit of doing this
+- Avoids mysterious errors
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+frames %&gt;%
+  group_by(test_item, sample_size, n_obs, condition) %&gt;%
+  summarise(response = mean(response)) %&gt;%
+  ungroup()
+```
+
+```
+## # A tibble: 42 x 5
+##    test_item sample_size n_obs condition response
+##        &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1         1 large          12 category      7.60
+##  2         1 large          12 property      7.16
+##  3         1 medium          6 category      7.32
+##  4         1 medium          6 property      6.66
+##  5         1 small           2 category      6.07
+##  6         1 small           2 property      5.78
+##  7         2 large          12 category      7.51
+##  8         2 large          12 property      7.20
+##  9         2 medium          6 category      7.17
+## 10         2 medium          6 property      6.95
+## # … with 32 more rows
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# ungroup!
+
+.pull.left[.pad1[.font2[
+- Get in the habit of doing this
+- Avoids mysterious errors
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+frames %&gt;% 
+  group_by(test_item) %&gt;%
+  summarise(
+    mean_resp = mean(response),
+    sd_resp = sd(response),
+    count = n()
+  ) %&gt;%
+  ungroup()
+```
+
+```
+## # A tibble: 7 x 4
+##   test_item mean_resp sd_resp count
+##       &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;
+## 1         1      6.77    2.56   675
+## 2         2      6.88    2.10   675
+## 3         3      5.71    2.41   675
+## 4         4      4.48    2.68   675
+## 5         5      3.76    2.81   675
+## 6         6      3.43    2.99   675
+## 7         7      3.26    3.11   675
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# pull()
+
+.pull.left[.pad1[.font2[
+- Same as $ in base R
+- Lets you select a single variable
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+frames %&gt;% 
+  pull(test_item)
+```
+
+```
+##    [1] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+##   [38] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+##   [75] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+##  [112] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+##  [149] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+##  [186] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+##  [223] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+##  [260] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+##  [297] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+##  [334] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+##  [371] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+##  [408] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+##  [445] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+##  [482] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+##  [519] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+##  [556] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+##  [593] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+##  [630] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+##  [667] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+##  [704] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+##  [741] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+##  [778] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+##  [815] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+##  [852] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+##  [889] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+##  [926] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+##  [963] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [1000] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [1037] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [1074] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [1111] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [1148] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [1185] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [1222] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [1259] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [1296] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [1333] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [1370] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [1407] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [1444] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [1481] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [1518] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [1555] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [1592] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [1629] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [1666] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [1703] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [1740] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [1777] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [1814] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [1851] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [1888] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [1925] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [1962] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [1999] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [2036] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [2073] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [2110] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [2147] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [2184] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [2221] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [2258] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [2295] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [2332] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [2369] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [2406] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [2443] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [2480] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [2517] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [2554] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [2591] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [2628] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [2665] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [2702] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [2739] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [2776] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [2813] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [2850] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [2887] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [2924] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [2961] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [2998] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [3035] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [3072] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [3109] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [3146] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [3183] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [3220] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [3257] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [3294] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [3331] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [3368] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [3405] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [3442] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [3479] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [3516] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [3553] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [3590] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [3627] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [3664] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [3701] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [3738] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [3775] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [3812] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [3849] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [3886] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [3923] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [3960] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [3997] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [4034] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [4071] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [4108] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [4145] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [4182] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [4219] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [4256] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [4293] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [4330] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [4367] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [4404] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [4441] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4
+## [4478] 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6
+## [4515] 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1
+## [4552] 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3
+## [4589] 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5
+## [4626] 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+## [4663] 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2
+## [4700] 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7 1 2 3 4 5 6 7
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# pull()
+
+.pull.left[.pad1[.font2[
+- Same as $ in base R
+- Lets you select a single variable
+- ... And assign it
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+ti &lt;- frames %&gt;% 
+  pull(test_item)
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 3]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling3-task.Rmd]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[arrange,&lt;BR&gt;filter,&lt;BR&gt;select,&lt;BR&gt;mutate]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# filter()
+
+.pull.left[.pad1[.font2[
+- Same as subset() in base R
+- Lets you select a part of the dataset
+- e.g. just the small sample size trials
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response &lt;- frames %&gt;%
+  group_by(test_item, sample_size, n_obs, condition) %&gt;%
+  summarise(response = mean(response)) %&gt;%
+  ungroup()
+
+average_response %&gt;%
+  filter(sample_size == "small")
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# filter()
+
+.pull.left[.pad1[.font2[
+- Same as subset() in base R
+- Lets you select a part of the dataset
+- e.g. just the small sample size trials
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response %&gt;%
+  filter(sample_size == "small")
+```
+
+```
+## # A tibble: 14 x 5
+##    test_item sample_size n_obs condition response
+##        &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1         1 small           2 category      6.07
+##  2         1 small           2 property      5.78
+##  3         2 small           2 category      6.26
+##  4         2 small           2 property      6.21
+##  5         3 small           2 category      5.87
+##  6         3 small           2 property      5.24
+##  7         4 small           2 category      5.11
+##  8         4 small           2 property      4.68
+##  9         5 small           2 category      4.55
+## 10         5 small           2 property      3.99
+## 11         6 small           2 category      4.16
+## 12         6 small           2 property      3.68
+## 13         7 small           2 category      3.98
+## 14         7 small           2 property      3.67
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# arrange()
+
+.pull.left[.pad1[.font2[
+- We might want to view it by condition
+- arrange() sorts in different orders
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response %&gt;%
+  filter(sample_size == "small") %&gt;%
+  arrange(condition)
+```
+
+```
+## # A tibble: 14 x 5
+##    test_item sample_size n_obs condition response
+##        &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1         1 small           2 category      6.07
+##  2         2 small           2 category      6.26
+##  3         3 small           2 category      5.87
+##  4         4 small           2 category      5.11
+##  5         5 small           2 category      4.55
+##  6         6 small           2 category      4.16
+##  7         7 small           2 category      3.98
+##  8         1 small           2 property      5.78
+##  9         2 small           2 property      6.21
+## 10         3 small           2 property      5.24
+## 11         4 small           2 property      4.68
+## 12         5 small           2 property      3.99
+## 13         6 small           2 property      3.68
+## 14         7 small           2 property      3.67
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# select()
+
+.pull.left[.pad1[.font2[
+- We might not want all of our variables
+- select() picks only some of them
+- Key: select() is columns, filter() is rows
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response %&gt;%
+  filter(sample_size == "small") %&gt;%
+  arrange(condition) %&gt;%
+  select(test_item, condition, response)
+```
+
+```
+## # A tibble: 14 x 3
+##    test_item condition response
+##        &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+##  1         1 category      6.07
+##  2         2 category      6.26
+##  3         3 category      5.87
+##  4         4 category      5.11
+##  5         5 category      4.55
+##  6         6 category      4.16
+##  7         7 category      3.98
+##  8         1 property      5.78
+##  9         2 property      6.21
+## 10         3 property      5.24
+## 11         4 property      4.68
+## 12         5 property      3.99
+## 13         6 property      3.68
+## 14         7 property      3.67
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# Assignment
+
+.pull.left[.pad1[.font2[
+- Let's assign this to a variable
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response_small &lt;- average_response %&gt;%
+  filter(sample_size == "small") %&gt;%
+  arrange(condition) %&gt;%
+  select(test_item, condition, response)
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# mutate()
+
+.pull.left[.pad1[.font2[
+- Creates a new variable
+- Rescales response to go from 0 to 1
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response_small &lt;- average_response_small %&gt;%
+  mutate(generalisation = response/9)
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# select()
+
+.pull.left[.pad1[.font2[
+- When used with a - indicates everything but
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+average_response_small &lt;- average_response_small %&gt;%
+  mutate(generalisation = response/9) %&gt;%
+  select(-response)
+
+average_response_small
+```
+
+```
+## # A tibble: 14 x 3
+##    test_item condition generalisation
+##        &lt;dbl&gt; &lt;chr&gt;              &lt;dbl&gt;
+##  1         1 category           0.674
+##  2         2 category           0.696
+##  3         3 category           0.652
+##  4         4 category           0.568
+##  5         5 category           0.506
+##  6         6 category           0.462
+##  7         7 category           0.442
+##  8         1 property           0.643
+##  9         2 property           0.690
+## 10         3 property           0.583
+## 11         4 property           0.521
+## 12         5 property           0.443
+## 13         6 property           0.409
+## 14         7 property           0.407
+```
+
+]]]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 4]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling4-task.Rmd]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 5]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling5-task.Rmd]
+]]
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[gather and spread]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-two bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+]]
+
+.column.bg-main3[.content.vmiddle.center[
+
+&lt;img src="images/horst_tidyr.png", width="70%"&gt;
+
+[@allison_horst](https://twitter.com/allison_horst)
+
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# spread()
+
+.pull.left[.pad1[.font2[
+- Separates a single column into two 
+- Here: each condition is its own column
+- Value is another variable
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+wide_avrs &lt;- average_response_small %&gt;%
+  spread(key = condition, value = generalisation)
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# spread()
+
+.pull.left[.pad1[.font2[
+- Separates a single column into two 
+- Here: each condition is its own column
+- Value is another variable
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+wide_avrs &lt;- average_response_small %&gt;%
+  spread(key = condition, value = generalisation)
+
+wide_avrs
+```
+
+```
+## # A tibble: 7 x 3
+##   test_item category property
+##       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1         1    0.674    0.643
+## 2         2    0.696    0.690
+## 3         3    0.652    0.583
+## 4         4    0.568    0.521
+## 5         5    0.506    0.443
+## 6         6    0.462    0.409
+## 7         7    0.442    0.407
+```
+
+]]]
+]]
+
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+class: split-30 bg-main1
+
+.column.bg-main1[.content.vmiddle.center[
+
+# gather()
+
+.pull.left[.pad1[.font2[
+- Combines two columns into one 
+- The column names are put into the key
+- The values are put into the value
+]]]
+]]
+
+.column.bg-main3[.content.vtop.center[
+.pull.left[.pad1[.font2[
+
+```r
+wide_avrs %&gt;% gather(
+  key = "condition", value = "generalisation", 
+  category, property)
+```
+
+```
+## # A tibble: 14 x 3
+##    test_item condition generalisation
+##        &lt;dbl&gt; &lt;chr&gt;              &lt;dbl&gt;
+##  1         1 category           0.674
+##  2         2 category           0.696
+##  3         3 category           0.652
+##  4         4 category           0.568
+##  5         5 category           0.506
+##  6         6 category           0.462
+##  7         7 category           0.442
+##  8         1 property           0.643
+##  9         2 property           0.690
+## 10         3 property           0.583
+## 11         4 property           0.521
+## 12         5 property           0.443
+## 13         6 property           0.409
+## 14         7 property           0.407
+```
+
+]]]
+]]
+
+
+&lt;!-- *********** NEW SLIDE ************** --&gt;
+---
+
+class: bg-main1 center middle hide-slide-number
+
+.reveal-text.bg-main2[.pad1[
+.font4[Exercise 6]
+.font6[&lt;BR&gt;day3/exercises/dplyr/wrangling6-task.Rmd]
+]]
+
+
+
+&lt;!-- DONE --&gt;
+---
+
+class: bg-main1 middle center
+
+## Hooray!
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
