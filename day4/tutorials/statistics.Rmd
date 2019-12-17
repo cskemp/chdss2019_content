@@ -22,6 +22,7 @@ library(lme4)
 library(brms)
 library(tidybayes)
 frames <- read_csv(here("samplingframes", "data", "data_samplesize.csv"))
+set.seed(1) # for replicability
 ```
 
 ## What this section is not 
@@ -209,7 +210,7 @@ The least-squares regression model (ie the one fit using `lm()`) gave estimates 
 
 ## Model comparison
 
-Above we used an anova to compare regression models with and without a term for `condition`. The analogous Bayesian approach uses Bayes factors to compare two models. Let $M_2$ be the Bayesian model we specified before, and let $M_1$ be  simpler model $M_1$ that doesn't include a term for `condition`. The Bayes factor comparing the two is
+Above we used an anova to compare regression models with and without a term for `condition`. The analogous Bayesian approach uses Bayes factors to compare two models. Let $M_2$ be the Bayesian model we specified before, and let $M_1$ be the simpler model $M_1$ that doesn't include a term for `condition`. The Bayes factor comparing the two is
 
 \begin{align}
 BF_{21} &= \frac{P(M_2 | D)}{P(M_1 | D)} \\
@@ -283,7 +284,7 @@ In this ANOVA table, what you're looking at is a test of `mod2` against `mod1`, 
 
 ### Model selection using the AIC and BIC
 
-An alternative approach is to compare the three models using a statistic that accounts for model complexity.  A simple model that accounts for just the pattern of data observed seems better than a complex model that is flexible enough to fit many patterns of data, including the pattern observed as well as many others. The same conclusion holds if the more complex model  fits the data slightly better -- probably it does better by virtue of its flexibility,  not because it is closer  to the truth.
+An alternative approach is to compare the three models using a statistic that accounts for model complexity.  A simple model that accounts for just the pattern of data observed seems better than a complex model that is flexible enough to fit many patterns of data, including the pattern observed as well as many others. The same conclusion holds if the more complex model  fits the data slightly better -- probably it does so by virtue of its flexibility,  not because it is closer  to the truth.
 
 Two scoring measures that take model complexity into account are the  Akaike information criterion (AIC) and the Bayesian information criterion (BIC), both of which have been around since the 1970s. For our linear models, we can evaluate them using the `AIC()` and `BIC()` functions: 
 
@@ -319,16 +320,27 @@ modestframes <- frames %>%
 glimpse(modestframes)
 ```
 
-As always, we start by visualizing the data.
+As always, we start by visualizing the data. We'll plot data for 80 individuals along with average responses across the entire group.
 ```{r} 
 
-modestframes %>%   
+# get a random sample of 80 participants
+whichids <- sample(unique(modestframes$id), 80)
+
+modestframes_sample <- modestframes %>% 
+  filter(id %in% whichids)
+
+mfplot <- modestframes %>%   
   group_by(condition, n_obs) %>%
   summarize(response = mean(response)) %>% 
   ggplot(aes(x = n_obs, y = response)) +
   geom_point() + 
   geom_line() + 
-  facet_grid(~condition)  
+  # now add data for the 80 individuals in whichids
+  geom_point(data = modestframes_sample, aes(x = n_obs, y = response, colour = factor(id)), show.legend = FALSE) + 
+  geom_line(data = modestframes_sample,  aes(x = n_obs, y = response, colour = factor(id)), show.legend = FALSE, alpha = .3) + 
+  facet_wrap(~condition)   
+
+plot(mfplot)
 ```
 
 
@@ -357,19 +369,8 @@ To compare them:
 anova(modest1, modest2)
 ```
 
-One thing that is nice about mixed models is that you can allow much more customisation than this. For instance, is it really all that plausible to think that everyone has a unique "random intercept" term, but is affected by the sample size in precisely the same way? That seems unlikely. To see this, let's plot the data for a random subset of 80 participants:
-
-```{r}
-whichids <- sample(unique(modestframes$id), 80)
-modestframes %>%
-  filter(id %in% whichids) %>%
-  ggplot(aes(x = n_obs, y = response, colour = factor(id))) +
-  geom_point(show.legend = FALSE) + 
-  geom_line(show.legend = FALSE, alpha = .3) + 
-  facet_wrap(~ condition)
-```
-
-To my mind, it beggars belief to think that these lines are all supposed to have the same slope, so we should probably extend the model a bit. Let's suppose that everyone has their own "random slope" term (i.e., everyone has their own regression coefficient for the effect of sample size). That gives us this model:
+One thing that is nice about mixed models is that you can allow much more customisation than this. For instance, is it really all that plausible to think that everyone has a unique "random intercept" term, but is affected by the sample size in precisely the same way? The data for individuals in the plot above make it very clear that the curves for different individuals have different slopes.
+So let's suppose that everyone has their own "random slope" term (i.e., everyone has their own regression coefficient for the effect of sample size). That gives us this model:
 
 ```{r modestframeslmer2, cache = TRUE}
 modest3 <- lmer(formula = response ~ condition + n_obs + (1 + n_obs|id), data = modestframes)
@@ -416,7 +417,7 @@ modestframes %>%
   geom_hline( yintercept = 0)
 ```
 
-So we have a problem -- the residuals tend to increase with `n_obs`. If we had a good fit, we'd be unable to see any structure in the residuals. Probably the main issue here is that the responses use a bounded scale (0 - 9), which means that we shouldn't be fitting a linear model. We'll deal with this in a later section. 
+So we have a problem -- the residuals tend to increase with `n_obs`. If we had a good fit, we'd be unable to see any structure in the residuals. One reason for the model misfit is that the responses use a bounded scale (0 - 9), which means that we shouldn't really be fitting a linear model. 
 
 It's helpful also to look at the fitted values for individuals. So let's plot the fitted values for the same 80 individuals we selected randomly earlier on:
 
@@ -429,7 +430,7 @@ modestframes %>%
   facet_wrap(~ condition)
 ```
 
-Overall this seems like a reasonable, though imperfect, approximation to what appears to be going on in the data. 
+Overall this seems like a reasonable, though imperfect, approximation to what's going on in the data. 
 
 ## Example 2: More complicated designs
 
@@ -451,7 +452,7 @@ From the last exercise, we can be reasonably sure that there is a fixed effect o
 
 ```{r linframes, cache = TRUE}
 linframes1 <- lmer(formula = response ~ condition + n_obs + (1 + n_obs|id), data = frames)
-linframes2 <- lmer(formula = response ~ condition + test_item + (1 + test_item + n_obs|id), data = frames)
+linframes2 <- lmer(formula = response ~ condition + n_obs + test_item + (1 + n_obs + test_item |id), data = frames)
 ```
 
 As before, we can call the `anova()` function to run some simple model comparisons:
@@ -465,8 +466,6 @@ I personally prefer to rely on BIC over $p$-values or AIC, but realistically non
 ```{r}
 summary(linframes2)
 ```
-
-The correlation term here deserves some explanation [TODO]
 
 Add the model fits and residuals
 
@@ -502,7 +501,7 @@ logitmod <- glmer(
   data = glmerframes)
 ```
 
-For comparison, lets fit this model with a linear link function (i.e., same model as last time, but using the rescaled data)
+For comparison, let's fit this model with a linear link function (i.e., same model as last time, but using the rescaled data)
 
 ```{r lmer, cache=TRUE}
 linearmod <- lmer(
