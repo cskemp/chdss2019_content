@@ -148,7 +148,7 @@ summary(full_bf/no_n_obs_bf)
 # TODO: could add similar tests of interactions 
 ```
 
-Most of the Bayes factors are large, suggesting that the full model should be preferred to the reduced models. The one exception is the Bayes factor comparing the full model to the model without a main effect of `n_obs`. This Bayes factor is less than one, suggesting that the model without the main effect of `n_obs` should be preferred to the full model. 
+Most of the Bayes factors is large, suggesting that the full model should be preferred to the reduced models. The one exception is the Bayes factor comparing the full model to the model without a main effect of `n_obs`. This Bayes factor is less than one, suggesting that the model without the main effect of `n_obs` should be preferred to the full model. 
 
 If following this approach, the paper would include a writeup and interpretation for each of the Bayes factors computed. For example, in their [paper](https://compcogscisydney.org/publications/HayesBFN_frames.pdf) Hayes et al. write
 
