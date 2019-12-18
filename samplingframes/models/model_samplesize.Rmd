@@ -93,6 +93,11 @@ pic <- tidymeans %>%
 plot(pic)
 ```
 
+##  Exercise
+
+Run the chunk above a few times to draw samples from the prior.  Does this prior capture the intuitive expectations that you bring to the spheres of Sodor problem? For example, the prior assigns some probability to U-shaped curves and other curves with one or more turning points: is this reasonable?
+
+
 ##  Sampling frames model
 
 We'll now use JAGS to model the generalization problem given to participants. There are two separate `.bug` files --- one  for the category sampling condition (`category.bug`) and one for the property sampling conditions (`property.bug`). The models for these conditions use the same prior but different likelihood functions, and the two `.bug` files reflect the two different assumptions about the likelihood.
