@@ -22,7 +22,7 @@ library(here)
 set.seed(1)
 ```
 
-This document gives an introduction to mixed effects models.  It's follows Chapter 9 of [R for Psych](https://glennwilliams.me/r4psych/) by Glenn Williams very closely, and the toy data set we'll use is from the same resource.
+This document gives an introduction to mixed effects models.  It follows Chapter 9 of [R for Psych](https://glennwilliams.me/r4psych/) by Glenn Williams very closely, and the toy data set we'll use is from the same resource.
 
 ```{r data}
 sleep_groups <-read_csv(here("data", "sleep_study_with_sim_groups.csv")) 
@@ -159,7 +159,7 @@ me_subjectintercept <- lmer(Reaction ~ Days + (1 + Days | Group) + (1|Subject), 
 
 ## Exercise 1: Add a random slope for Subject
 
-How about a random slope for Subject as well?
+Use `lmer` to fit a model that is similar to `me_subjectintercept' but also includes a random slope for Subject.
 
 ```{r eval=FALSE}
 me_subjectinterceptslope <- lmer(YOUR_CODE_HERE) 

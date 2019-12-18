@@ -1,5 +1,5 @@
 ---
-title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Probabilistic models</h1></div>'
+title: '<div class="jumbotron"><h1 class="title toc-ignore display-3">Day 4: Bayesian Inference</h1></div>'
 author: "Charles Kemp"
 date: "CHDSS 2019"
 output:
@@ -21,10 +21,11 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-## Bayesian cognitive models vs Bayesian Data analysis
+This notebook gives a simple example of Bayesian inference.
 
-## Probability distributions
+## Coughing Patient
 
+Suppose that you work in a doctor's office and you meet a woman called Jen who is sitting in the waiting room. You start thinking about what condition she might have. To keep things simple, let's assume that there are only three possible hypotheses $h$: either she has a `cold`, or she has `emphysema`, or she has a `stomach upset`. Your prior distribution $P(h)$ over these hypotheses captures your expectations about which hypothesis is true before you have gathered any additional evidence. Let's assume that the prior plotted below captures your beliefs. As set up initially, the prior captures the idea that `cold` and `stomach upset` are both more likely than `emphysema`.
 
 ```{r coughing_friend_prior, fig.height=2, fig.width=4}
 h  <- c('cold', 'emphysema', 'stomach upset')
@@ -44,6 +45,8 @@ plotdiseasechart <- function(d) {
 plotdiseasechart(prior)
 ```
 
+Now you notice that Jen has a cough. This observation is our data set $D$. Your *likelihood function* $P(D|h)$indicates how probable the data would be if each of the hypotheses were true. 
+The vertical-bar notation represents a conditional probability --- the probability of $D$ given $h$. The function $P(D|h)$ plotted below indicates that coughing is fairly probable if Jen has a cold or if she has emphsyema, but not very probable if she has a stomach upset.
 
 ```{r coughing_friend_likelihood, fig.height=2, fig.width=4}
 p_d_given_h <- c(0.4, 0.4, 0.05)
@@ -51,6 +54,14 @@ likelihood  <- tibble(h, val=p_d_given_h, dist='likelihood P(D|h)')
 plotdiseasechart(likelihood)
 ```
 
+
+
+After observing the data $D$ you update your prior beliefs $P(h)$ and these updated beliefs are captured by a posterior distribution $P(h|D)$. The notation here again represents a conditional probability --- the probability of $h$ given $D$. The normative way to combine the prior and likelihood to arrive at the posterior is captured by Bayes rule:
+\begin{equation}
+P(h|D) \propto P(D|h) P(h)
+\end{equation}
+
+So we can calculate the posterior by multiplying the likelihood and the prior then renormalizing (ie dividing by a constant so that the posterior distribution sums to 1 over the hypothesis space).
 
 ```{r coughing_friend_posterior, fig.height=2, fig.width=4}
 # update prior by multiplying by likelihood
@@ -61,4 +72,13 @@ posterior  <- tibble(h, val=p_h_given_d, dist='posterior P(h|D)')
 plotdiseasechart(posterior)
 ```
 
+Here the posterior indicates that `cold` is the most likely diagnosis. Of the three hypotheses it is the only one which has a fairly high prior $P(h)$ AND which makes the data probable (ie has a high likelihood $P(D|h)$).
+
+## Exercises 
+
+1. The prior and posterior distributions sum to 1 but the likelihood function does not. Should it? Why or why not?
+
+2. Change the code so that the prior is uniform. Generate the plots again --- does the posterior match your intuitions about  what should happen if the prior were truly random?
+
+3. Change the code to use the original prior but adjust the likelihood so that coughing is equally probable given each hypothesis (e.g. P(coughing|cold) = P(coughing|emphysema) = P(coughing|stomach  upset) = 0.4). Generate the plots again --- does the posterior match your intuitions about what should happen if the likelihood were truly random?
 
