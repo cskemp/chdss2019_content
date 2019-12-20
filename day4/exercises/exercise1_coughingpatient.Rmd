@@ -29,7 +29,7 @@ Suppose that you work in a doctor's office and you meet a woman called Jen who i
 
 ```{r coughing_friend_prior, fig.height=2, fig.width=4}
 h  <- c('cold', 'emphysema', 'stomach upset')
-p_h <- c(0.46, 0.04, 0.4)
+p_h <- c(0.46, 0.04, 0.5)
 prior <- tibble(h, val=p_h, dist='prior P(h)')
 
 plotdiseasechart <- function(d) {

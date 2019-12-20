@@ -27,7 +27,7 @@ This document gives an introduction to mixed effects models.  It follows Chapter
 ```{r data}
 sleep_groups <-read_csv(here("data", "sleep_study_with_sim_groups.csv")) 
 
-if (0) { # shuffle subjects between groups
+if (1) { # shuffle subjects between groups
 # make frame showing Group for each Subject
 SubjGroups <-  sleep_groups %>%  
   group_by(Subject, Group) %>%  
@@ -154,6 +154,7 @@ Now the regression lines for each group look better.
 There's another dependency that we haven't yet acknowledged. All of the data points for a given individual will be coupled in a way that data points for different individuals are not. So we could perhaps add a random intercept for Subject.
 
 ```{r }
+set.seed(1)
 me_subjectintercept <- lmer(Reaction ~ Days + (1 + Days | Group) + (1|Subject), data = sleep_groups)
 ```
 
@@ -161,16 +162,16 @@ me_subjectintercept <- lmer(Reaction ~ Days + (1 + Days | Group) + (1|Subject), 
 
 Use `lmer` to fit a model that is similar to `me_subjectintercept' but also includes a random slope for Subject.
 
-```{r eval=FALSE}
-me_subjectinterceptslope <- lmer(YOUR_CODE_HERE) 
+```{r eval=TRUE}
+me_subjectinterceptslope <- lmer(Reaction ~ Days + (1 + Days | Group) + (1 + Days|Subject), data = sleep_groups) 
 ```
 
 ## Exercise 2: Model comparison
 
 Compare 5 models using an ANOVA: `me_intercepts`, `me_slopes`, `me_interceptslopes`, `me_subjectintercept`, `me_subjectinterceptslope`. Look at the BIC values in the output to see which model fits best. 
 
-```{r eval=FALSE}
-ONE_LINE_HERE
+```{r eval=TRUE}
+anova(me_intercepts, me_slopes, me_interceptslopes, me_subjectintercept, me_subjectinterceptslope)
 ```
 
 ## Exercise 3: Model comparison
